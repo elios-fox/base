@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_bloc.dart';
 import '../../../core/widgets/error_view.dart';
@@ -23,6 +24,14 @@ class HomeView extends StatelessWidget {
                 'Menu',
                 style: TextStyle(fontSize: 24),
               ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.checklist),
+              title: const Text('Checklists'),
+              onTap: () {
+                Navigator.of(context).pop();
+                context.go('/bardienst');
+              },
             ),
             ListTile(
               leading: const Icon(Icons.logout),
