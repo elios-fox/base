@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/models/checklist_item.dart';
+import 'checklist_photo.dart';
 
 class ChecklistItemEditorPage extends StatefulWidget {
   const ChecklistItemEditorPage({
@@ -52,20 +53,7 @@ class _ChecklistItemEditorPageState extends State<ChecklistItemEditorPage> {
       );
     }
     if (_photoUrl != null) {
-      return Image.network(
-        _photoUrl!,
-        height: 200,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => Container(
-          height: 200,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade300,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Center(child: Icon(Icons.broken_image)),
-        ),
-      );
+      return ChecklistPhoto(photoUrl: _photoUrl!);
     }
     return const SizedBox.shrink();
   }

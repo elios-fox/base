@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../bloc/checklist_wizard_bloc.dart';
+import '../widgets/checklist_photo.dart';
 
 class ChecklistWizardView extends StatelessWidget {
   const ChecklistWizardView({super.key});
@@ -40,14 +41,9 @@ class ChecklistWizardView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (item.photoUrl != null) ...[
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      item.photoUrl!,
-                      height: 200,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
+                  ChecklistPhoto(
+                    photoUrl: item.photoUrl!,
+                    borderRadius: 12,
                   ),
                   const SizedBox(height: 24),
                 ],

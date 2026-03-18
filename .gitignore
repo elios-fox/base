@@ -61,5 +61,11 @@ firebase.json
 
 # Platform build directories
 /android/.gradle/
+android/build/
 /ios/Pods/
 /web/build/
+
+# Code signing
+*.p12
+*.mobileprovision
+*.p8

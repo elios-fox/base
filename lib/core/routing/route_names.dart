@@ -7,4 +7,10 @@ abstract final class RouteNames {
   static const checklistEdit = 'checklistEdit';
   static const checklistDetail = 'checklistDetail';
   static const checklistWizard = 'checklistWizard';
+  static const attendance = 'attendance';
+  static const teamEvents = 'teamEvents';
+  static const teamDetail = 'teamDetail';
+  static const eventDetail = 'eventDetail';
+  static const joinTeam = 'joinTeam';
+  static const profile = 'profile';
 }

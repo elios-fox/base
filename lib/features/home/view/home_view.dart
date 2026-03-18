@@ -34,6 +34,14 @@ class HomeView extends StatelessWidget {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.groups),
+              title: const Text('Aanwezigheid'),
+              onTap: () {
+                Navigator.of(context).pop();
+                context.go('/attendance');
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Uitloggen'),
               onTap: () {

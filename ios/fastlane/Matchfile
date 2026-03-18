@@ -1,0 +1,5 @@
+git_url(ENV["MATCH_GIT_URL"])
+storage_mode("git")
+type("appstore")
+app_identifier("nl.com.club.manager")
+team_id("8S77A5GHBB")
