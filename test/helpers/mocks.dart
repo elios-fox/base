@@ -1,5 +1,6 @@
 import 'package:base/core/auth/auth_bloc.dart';
 import 'package:base/core/auth/auth_repository.dart';
+import 'package:base/core/supabase/supabase_storage.dart';
 import 'package:base/services/attendance_service.dart';
 import 'package:base/services/checklist_service.dart';
 import 'package:base/services/event_service.dart';
@@ -16,5 +17,7 @@ class MockTeamService extends Mock implements TeamService {}
 class MockEventService extends Mock implements EventService {}
 
 class MockAttendanceService extends Mock implements AttendanceService {}
+
+class MockStorageService extends Mock implements StorageService {}
 
 class MockAuthBloc extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}

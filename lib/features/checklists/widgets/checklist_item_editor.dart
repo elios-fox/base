@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/models/checklist_item.dart';
+import '../../../core/theme/app_colors.dart';
 import 'checklist_photo.dart';
 
 class ChecklistItemEditorPage extends StatefulWidget {
@@ -104,7 +105,7 @@ class _ChecklistItemEditorPageState extends State<ChecklistItemEditorPage> {
                       _photoBytes = null;
                     }),
                     style: IconButton.styleFrom(
-                      backgroundColor: Colors.black54,
+                      backgroundColor: AppColors.greyDark,
                       foregroundColor: Colors.white,
                     ),
                   ),

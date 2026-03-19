@@ -10,6 +10,7 @@ abstract class TeamService {
   Future<Team?> getTeam(String id);
   Future<Team> createTeam(String name, String ownerUid, String sport);
   Future<void> updateTeam(Team team);
+  Future<void> updateTeamPhoto(String teamId, String photoUrl, String dominantColor);
   Future<void> deleteTeam(String id);
   Future<Team> joinTeam(String inviteCode);
   Future<void> leaveTeam(String teamId, String userId);
@@ -97,7 +98,21 @@ class SupaTeamService implements TeamService {
       'name': team.name,
       'owner_uid': team.ownerUid,
       'member_uids': team.memberUids,
+      'photo_url': team.photoUrl,
+      'dominant_color': team.dominantColor,
     }).eq('id', team.id);
+  }
+
+  @override
+  Future<void> updateTeamPhoto(
+    String teamId,
+    String photoUrl,
+    String dominantColor,
+  ) async {
+    await _supabase.from('teams').update({
+      'photo_url': photoUrl,
+      'dominant_color': dominantColor,
+    }).eq('id', teamId);
   }
 
   @override
@@ -135,6 +150,8 @@ class SupaTeamService implements TeamService {
       createdAt:
           DateTime.tryParse(map['created_at'] as String? ?? '') ?? DateTime.now(),
       memberUids: List<String>.from(map['member_uids'] as List? ?? []),
+      photoUrl: map['photo_url'] as String?,
+      dominantColor: map['dominant_color'] as String?,
     );
   }
 }

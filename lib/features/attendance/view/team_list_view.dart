@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_bloc.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../bloc/team_list_bloc.dart';
@@ -41,17 +42,17 @@ class TeamListView extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.groups_outlined, size: 64, color: Colors.grey),
+                          Icon(Icons.groups_outlined, size: 64, color: AppColors.grey),
                           SizedBox(height: 16),
                           Text(
                             'Nog geen teams.',
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                            style: TextStyle(fontSize: 18, color: AppColors.grey),
                           ),
                           SizedBox(height: 8),
                           Text(
                             'Maak een team aan om de aanwezigheid bij te houden.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey),
+                            style: TextStyle(color: AppColors.grey),
                           ),
                         ],
                       ),

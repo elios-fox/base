@@ -1,6 +1,12 @@
 part of 'login_bloc.dart';
 
-enum LoginStatus { initial, submitting, success, failure }
+enum LoginStatus {
+  initial,
+  submitting,
+  success,
+  failure,
+  emailConfirmationSent,
+}
 
 final class LoginState extends Equatable {
   const LoginState({
@@ -17,19 +23,21 @@ final class LoginState extends Equatable {
   final LoginStatus status;
   final String? errorMessage;
 
+  /// Use [clearError] to explicitly clear the error message.
   LoginState copyWith({
     String? email,
     String? password,
     String? name,
     LoginStatus? status,
     String? errorMessage,
+    bool clearError = false,
   }) {
     return LoginState(
       email: email ?? this.email,
       password: password ?? this.password,
       name: name ?? this.name,
       status: status ?? this.status,
-      errorMessage: errorMessage ?? this.errorMessage,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 

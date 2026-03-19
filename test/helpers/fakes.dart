@@ -7,6 +7,8 @@ Team fakeTeam({
   String name = 'Heren 1',
   String ownerUid = 'user-1',
   List<String> memberUids = const ['user-1', 'user-2'],
+  String? photoUrl,
+  String? dominantColor,
 }) {
   return Team(
     id: id,
@@ -14,6 +16,8 @@ Team fakeTeam({
     ownerUid: ownerUid,
     createdAt: DateTime(2026, 1, 1),
     memberUids: memberUids,
+    photoUrl: photoUrl,
+    dominantColor: dominantColor,
   );
 }
 

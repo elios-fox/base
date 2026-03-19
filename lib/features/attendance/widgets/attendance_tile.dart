@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/models/attendance.dart';
+import '../../../core/theme/app_colors.dart';
 
 class AttendanceTile extends StatelessWidget {
   const AttendanceTile({
@@ -14,9 +15,9 @@ class AttendanceTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final (icon, color) = switch (attendance.status) {
-      AttendanceStatus.aanwezig => (Icons.check_circle, Colors.green),
-      AttendanceStatus.afwezig => (Icons.cancel, Colors.red),
-      AttendanceStatus.onzeker => (Icons.help, Colors.orange),
+      AttendanceStatus.aanwezig => (Icons.check_circle, AppColors.aanwezig),
+      AttendanceStatus.afwezig => (Icons.cancel, AppColors.afwezig),
+      AttendanceStatus.onzeker => (Icons.help, AppColors.onzeker),
     };
 
     return ListTile(

@@ -20,7 +20,7 @@ class App extends StatelessWidget {
         builder: (context) {
           final authBloc = context.read<AuthBloc>();
           return MaterialApp.router(
-            title: 'Base',
+            title: 'ClubHub',
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             routerConfig: createAppRouter(authBloc),

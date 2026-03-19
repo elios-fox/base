@@ -15,66 +15,99 @@ class LoginView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          child: AuthCard(
-            children: [
-              Text(
-                'Welkom',
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
+    return BlocListener<LoginBloc, LoginState>(
+      listenWhen: (previous, current) => previous.status != current.status,
+      listener: (context, state) {
+        if (state.status == LoginStatus.failure &&
+            state.errorMessage != null) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage!),
+                backgroundColor: theme.colorScheme.error,
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Log in om verder te gaan',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              EmailPasswordForm(
-                submitLabel: 'Inloggen',
-                onSubmitted: () => context
-                    .read<LoginBloc>()
-                    .add(const LoginWithEmailSubmitted()),
-              ),
-              const SizedBox(height: 24),
-              const Row(
-                children: [
-                  Expanded(child: Divider()),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('of'),
+            );
+        }
+      },
+      child: Scaffold(
+        body: Center(
+          child: SingleChildScrollView(
+            child: AuthCard(
+              children: [
+                Text(
+                  'Welkom',
+                  style: theme.textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  Expanded(child: Divider()),
-                ],
-              ),
-              const SizedBox(height: 24),
-              SocialSignInButton(
-                label: 'Doorgaan met Google',
-                icon: const Icon(Icons.g_mobiledata, size: 24),
-                onPressed: () => context
-                    .read<LoginBloc>()
-                    .add(const LoginWithGooglePressed()),
-              ),
-              const SizedBox(height: 8),
-              SocialSignInButton(
-                label: 'Doorgaan met Apple',
-                icon: const Icon(Icons.apple, size: 20),
-                onPressed: () => context
-                    .read<LoginBloc>()
-                    .add(const LoginWithApplePressed()),
-              ),
-              const SizedBox(height: 24),
-              TextButton(
-                onPressed: () => context.goNamed(RouteNames.signUp),
-                child: const Text('Geen account? Registreer je'),
-              ),
-            ],
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Log in om verder te gaan',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                EmailPasswordForm(
+                  submitLabel: 'Inloggen',
+                  onSubmitted: () => context
+                      .read<LoginBloc>()
+                      .add(const LoginWithEmailSubmitted()),
+                ),
+                const SizedBox(height: 24),
+                const Row(
+                  children: [
+                    Expanded(child: Divider()),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text('of'),
+                    ),
+                    Expanded(child: Divider()),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                BlocBuilder<LoginBloc, LoginState>(
+                  buildWhen: (previous, current) =>
+                      previous.status != current.status,
+                  builder: (context, state) {
+                    final isSubmitting =
+                        state.status == LoginStatus.submitting;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SocialSignInButton(
+                          label: 'Doorgaan met Google',
+                          icon: const Icon(Icons.g_mobiledata, size: 24),
+                          onPressed: isSubmitting
+                              ? null
+                              : () => context
+                                  .read<LoginBloc>()
+                                  .add(const LoginWithGooglePressed()),
+                        ),
+                        const SizedBox(height: 8),
+                        SocialSignInButton(
+                          label: 'Doorgaan met Apple',
+                          icon: const Icon(Icons.apple, size: 20),
+                          onPressed: isSubmitting
+                              ? null
+                              : () => context
+                                  .read<LoginBloc>()
+                                  .add(const LoginWithApplePressed()),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+                TextButton(
+                  onPressed: () => context.goNamed(RouteNames.signUp),
+                  child: const Text('Geen account? Registreer je'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

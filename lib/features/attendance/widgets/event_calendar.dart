@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/models/team_event.dart';
+import '../../../core/theme/app_colors.dart';
 
 class EventCalendar extends StatefulWidget {
   const EventCalendar({
@@ -171,7 +172,7 @@ class _EventCalendarState extends State<EventCalendar> {
                                     shape: BoxShape.circle,
                                     color: isSelected
                                         ? theme.colorScheme.onPrimary
-                                        : Colors.blue,
+                                        : AppColors.training,
                                   ),
                                 ),
                               if (dayEvents.contains(EventType.wedstrijd))
@@ -183,7 +184,7 @@ class _EventCalendarState extends State<EventCalendar> {
                                     shape: BoxShape.circle,
                                     color: isSelected
                                         ? theme.colorScheme.onPrimary
-                                        : Colors.orange,
+                                        : AppColors.wedstrijd,
                                   ),
                                 ),
                             ],

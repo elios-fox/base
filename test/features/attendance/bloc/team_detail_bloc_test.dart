@@ -9,6 +9,7 @@ import '../../../helpers/mocks.dart';
 
 void main() {
   late MockTeamService mockTeamService;
+  late MockStorageService mockStorageService;
 
   setUpAll(() {
     registerFallbackValue(fakeTeam());
@@ -16,11 +17,17 @@ void main() {
 
   setUp(() {
     mockTeamService = MockTeamService();
+    mockStorageService = MockStorageService();
   });
+
+  TeamDetailBloc buildBloc() => TeamDetailBloc(
+        teamService: mockTeamService,
+        storageService: mockStorageService,
+      );
 
   group('TeamDetailBloc', () {
     test('initial state is correct', () {
-      final bloc = TeamDetailBloc(teamService: mockTeamService);
+      final bloc = buildBloc();
       expect(bloc.state, const TeamDetailState());
       expect(bloc.state.status, TeamDetailStatus.initial);
       expect(bloc.state.team, isNull);
@@ -33,7 +40,7 @@ void main() {
         final team = fakeTeam();
         when(() => mockTeamService.getTeam('team-1'))
             .thenAnswer((_) async => team);
-        return TeamDetailBloc(teamService: mockTeamService);
+        return buildBloc();
       },
       act: (bloc) => bloc.add(const TeamDetailLoadRequested('team-1')),
       expect: () => [
@@ -47,7 +54,7 @@ void main() {
       build: () {
         when(() => mockTeamService.getTeam('team-1'))
             .thenThrow(Exception('not found'));
-        return TeamDetailBloc(teamService: mockTeamService);
+        return buildBloc();
       },
       act: (bloc) => bloc.add(const TeamDetailLoadRequested('team-1')),
       expect: () => [
@@ -61,7 +68,7 @@ void main() {
       build: () {
         when(() => mockTeamService.updateTeam(any()))
             .thenAnswer((_) async {});
-        return TeamDetailBloc(teamService: mockTeamService);
+        return buildBloc();
       },
       seed: () => TeamDetailState(
         status: TeamDetailStatus.loaded,
@@ -88,7 +95,7 @@ void main() {
 
     blocTest<TeamDetailBloc, TeamDetailState>(
       'does nothing on TeamDetailMemberRemoved when team is null',
-      build: () => TeamDetailBloc(teamService: mockTeamService),
+      build: () => buildBloc(),
       act: (bloc) => bloc.add(const TeamDetailMemberRemoved(
         teamId: 'team-1',
         memberUid: 'user-2',
@@ -112,7 +119,7 @@ void main() {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(SystemChannels.platform, null);
       },
-      build: () => TeamDetailBloc(teamService: mockTeamService),
+      build: () => buildBloc(),
       act: (bloc) =>
           bloc.add(const TeamDetailInviteCodeCopied('INVITE-CODE-123')),
       wait: const Duration(seconds: 3),

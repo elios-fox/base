@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
+import '../../../core/theme/app_colors.dart';
+
 class ChecklistPhoto extends StatelessWidget {
   const ChecklistPhoto({
     super.key,
@@ -55,7 +57,7 @@ class ChecklistPhoto extends StatelessWidget {
       height: height,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.grey.shade300,
+        color: AppColors.divider,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: const Center(child: Icon(Icons.broken_image)),

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/auth/auth_bloc.dart';
+import '../../../core/theme/app_colors.dart';
 import '../bloc/join_team_bloc.dart';
 
 class JoinTeamView extends StatelessWidget {
@@ -62,13 +63,13 @@ class JoinTeamView extends StatelessWidget {
                 const SizedBox(height: 24),
                 if (state.status == JoinTeamStatus.success)
                   Card(
-                    color: Colors.green.shade50,
+                    color: AppColors.aanwezigBg,
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         children: [
                           const Icon(Icons.check_circle,
-                              color: Colors.green, size: 48),
+                              color: AppColors.aanwezig, size: 48),
                           const SizedBox(height: 8),
                           Text(
                             'Welkom bij ${state.teamName}!',

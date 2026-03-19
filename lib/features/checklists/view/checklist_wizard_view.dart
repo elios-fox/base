@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../bloc/checklist_wizard_bloc.dart';
 import '../widgets/checklist_photo.dart';
 
@@ -67,7 +68,7 @@ class ChecklistWizardView extends StatelessWidget {
                   label: Text(isCompleted ? 'Gereed' : 'Markeer als gereed'),
                   style: FilledButton.styleFrom(
                     backgroundColor:
-                        isCompleted ? Colors.green : null,
+                        isCompleted ? AppColors.aanwezig : null,
                   ),
                 ),
                 const SizedBox(height: 16),

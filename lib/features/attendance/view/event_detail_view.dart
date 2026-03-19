@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/auth/auth_bloc.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/models/attendance.dart';
 import '../../../core/models/team_event.dart';
 import '../../../core/widgets/loading_indicator.dart';
@@ -55,8 +56,8 @@ class EventDetailView extends StatelessWidget {
                                   ? Icons.fitness_center
                                   : Icons.emoji_events,
                               color: displayEvent.type == EventType.training
-                                  ? Colors.blue
-                                  : Colors.orange,
+                                  ? AppColors.training
+                                  : AppColors.wedstrijd,
                             ),
                             const SizedBox(width: 8),
                             Text(
@@ -65,8 +66,8 @@ class EventDetailView extends StatelessWidget {
                                   : 'Wedstrijd',
                               style: theme.textTheme.labelLarge?.copyWith(
                                 color: displayEvent.type == EventType.training
-                                    ? Colors.blue
-                                    : Colors.orange,
+                                    ? AppColors.training
+                                    : AppColors.wedstrijd,
                               ),
                             ),
                           ],
@@ -168,17 +169,17 @@ class EventDetailView extends StatelessWidget {
                       _StatChip(
                         label: 'Aanwezig',
                         count: state.aanwezigCount,
-                        color: Colors.green,
+                        color: AppColors.aanwezig,
                       ),
                       _StatChip(
                         label: 'Onzeker',
                         count: state.onzekerCount,
-                        color: Colors.orange,
+                        color: AppColors.wedstrijd,
                       ),
                       _StatChip(
                         label: 'Afwezig',
                         count: state.afwezigCount,
-                        color: Colors.red,
+                        color: AppColors.afwezig,
                       ),
                     ],
                   ),
@@ -206,7 +207,7 @@ class EventDetailView extends StatelessWidget {
                     padding: EdgeInsets.all(32),
                     child: Text(
                       'Nog niemand heeft gereageerd.',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: AppColors.grey),
                     ),
                   ),
                 ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/auth/auth_bloc.dart';
+import '../../../core/theme/app_colors.dart';
 import '../bloc/profile_bloc.dart';
 
 class ProfileView extends StatelessWidget {
@@ -120,7 +121,7 @@ class ProfileView extends StatelessWidget {
                 icon: const Icon(Icons.logout),
                 label: const Text('Uitloggen'),
                 style: FilledButton.styleFrom(
-                  backgroundColor: Colors.red,
+                  backgroundColor: AppColors.error,
                   foregroundColor: Colors.white,
                 ),
               ),

@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/auth/auth_bloc.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/color_utils.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../bloc/team_detail_bloc.dart';
@@ -35,6 +40,16 @@ class TeamDetailView extends StatelessWidget {
             TeamDetailStatus.loaded => ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+                  // Team Photo Section
+                  _TeamPhotoSection(
+                    photoUrl: state.team!.photoUrl,
+                    dominantColor: state.team!.dominantColor,
+                    isOwner: context.read<AuthBloc>().state.user!.uid ==
+                        state.team!.ownerUid,
+                    isUploading: state.isUploadingPhoto,
+                  ),
+                  const SizedBox(height: 16),
+
                   // Team Info Card
                   Card(
                     child: Padding(
@@ -113,7 +128,7 @@ class TeamDetailView extends StatelessWidget {
                           trailing: isCurrentUserOwner && !isOwner
                               ? IconButton(
                                   icon: const Icon(Icons.remove_circle_outline),
-                                  color: Colors.red,
+                                  color: AppColors.error,
                                   onPressed: () {
                                     showDialog(
                                       context: context,
@@ -170,5 +185,82 @@ class TeamDetailView extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class _TeamPhotoSection extends StatelessWidget {
+  const _TeamPhotoSection({
+    required this.photoUrl,
+    required this.dominantColor,
+    required this.isOwner,
+    required this.isUploading,
+  });
+
+  final String? photoUrl;
+  final String? dominantColor;
+  final bool isOwner;
+  final bool isUploading;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return GestureDetector(
+      onTap: isOwner && !isUploading ? () => _pickImage(context) : null,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: SizedBox(
+          height: 180,
+          width: double.infinity,
+          child: isUploading
+              ? Container(
+                  color: theme.colorScheme.surfaceContainerLow,
+                  child: const Center(child: CircularProgressIndicator()),
+                )
+              : photoUrl != null
+                  ? Image.network(
+                      photoUrl!,
+                      height: 180,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _buildPlaceholder(theme),
+                    )
+                  : _buildPlaceholder(theme),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder(ThemeData theme) {
+    final bgColor = dominantColor != null
+        ? ColorUtils.hexToColor(dominantColor!).withValues(alpha: 0.15)
+        : theme.colorScheme.surfaceContainerLow;
+    final iconColor = dominantColor != null
+        ? ColorUtils.hexToColor(dominantColor!)
+        : theme.colorScheme.onSurfaceVariant;
+
+    return Container(
+      color: bgColor,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.camera_alt_outlined, size: 48, color: iconColor),
+          const SizedBox(height: 8),
+          Text(
+            isOwner ? 'Foto toevoegen' : 'Geen foto',
+            style: theme.textTheme.bodyMedium?.copyWith(color: iconColor),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickImage(BuildContext context) async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked != null && context.mounted) {
+      context
+          .read<TeamDetailBloc>()
+          .add(TeamDetailPhotoUploadRequested(File(picked.path)));
+    }
   }
 }

@@ -19,8 +19,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onSubscriptionRequested(
     AuthSubscriptionRequested event,
     Emitter<AuthState> emit,
-  ) {
-    return emit.forEach<AuthUser?>(
+  ) async {
+    // Check if there is already a session at startup.
+    // This handles the case where the user was already logged in.
+    final currentUser = _authRepository.currentUser;
+    if (currentUser != null) {
+      emit(AuthState.authenticated(currentUser));
+    }
+
+    // Then listen to the auth state change stream for future changes.
+    // The stream will emit initialSession, signedIn, signedOut, etc.
+    await emit.forEach<AuthUser?>(
       _authRepository.authStateChanges,
       onData: (user) {
         if (user != null) {

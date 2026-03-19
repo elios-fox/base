@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/models/team_event.dart';
+import '../../../core/theme/app_colors.dart';
 
 class EventCard extends StatelessWidget {
   const EventCard({
@@ -26,11 +27,11 @@ class EventCard extends StatelessWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: isTraining
-              ? Colors.blue.shade100
-              : Colors.orange.shade100,
+              ? AppColors.trainingBg
+              : AppColors.wedstrijdBg,
           child: Icon(
             isTraining ? Icons.fitness_center : Icons.emoji_events,
-            color: isTraining ? Colors.blue.shade700 : Colors.orange.shade700,
+            color: isTraining ? AppColors.training : AppColors.wedstrijd,
           ),
         ),
         title: Text(
@@ -56,12 +57,12 @@ class EventCard extends StatelessWidget {
           label: Text(
             isTraining ? 'Training' : 'Wedstrijd',
             style: theme.textTheme.labelSmall?.copyWith(
-              color: isTraining ? Colors.blue.shade700 : Colors.orange.shade700,
+              color: isTraining ? AppColors.training : AppColors.wedstrijd,
             ),
           ),
           backgroundColor: isTraining
-              ? Colors.blue.shade50
-              : Colors.orange.shade50,
+              ? AppColors.trainingBgLight
+              : AppColors.wedstrijdBgLight,
           side: BorderSide.none,
           padding: EdgeInsets.zero,
           visualDensity: VisualDensity.compact,

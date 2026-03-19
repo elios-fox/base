@@ -22,38 +22,51 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final AuthRepository _authRepository;
 
   void _onEmailChanged(LoginEmailChanged event, Emitter<LoginState> emit) {
-    emit(state.copyWith(email: event.email));
+    emit(state.copyWith(email: event.email, clearError: true));
   }
 
   void _onPasswordChanged(
     LoginPasswordChanged event,
     Emitter<LoginState> emit,
   ) {
-    emit(state.copyWith(password: event.password));
+    emit(state.copyWith(password: event.password, clearError: true));
   }
 
   void _onNameChanged(
     LoginNameChanged event,
     Emitter<LoginState> emit,
   ) {
-    emit(state.copyWith(name: event.name));
+    emit(state.copyWith(name: event.name, clearError: true));
   }
 
   Future<void> _onEmailSubmitted(
     LoginWithEmailSubmitted event,
     Emitter<LoginState> emit,
   ) async {
-    emit(state.copyWith(status: LoginStatus.submitting));
+    if (state.email.isEmpty || state.password.isEmpty) {
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        errorMessage: 'Vul je e-mailadres en wachtwoord in.',
+      ));
+      return;
+    }
+
+    emit(state.copyWith(status: LoginStatus.submitting, clearError: true));
     try {
       await _authRepository.signInWithEmailAndPassword(
         state.email,
         state.password,
       );
       emit(state.copyWith(status: LoginStatus.success));
+    } on AuthError catch (e) {
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        errorMessage: e.message,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: LoginStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: 'Er is een fout opgetreden. Probeer het opnieuw.',
       ));
     }
   }
@@ -62,18 +75,37 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     SignUpWithEmailSubmitted event,
     Emitter<LoginState> emit,
   ) async {
-    emit(state.copyWith(status: LoginStatus.submitting));
+    if (state.email.isEmpty || state.password.isEmpty) {
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        errorMessage: 'Vul je e-mailadres en wachtwoord in.',
+      ));
+      return;
+    }
+
+    emit(state.copyWith(status: LoginStatus.submitting, clearError: true));
     try {
-      await _authRepository.createUserWithEmailAndPassword(
+      final result = await _authRepository.createUserWithEmailAndPassword(
         state.email,
         state.password,
         name: state.name.isNotEmpty ? state.name : null,
       );
-      emit(state.copyWith(status: LoginStatus.success));
+
+      switch (result) {
+        case SignUpResult.authenticated:
+          emit(state.copyWith(status: LoginStatus.success));
+        case SignUpResult.needsEmailConfirmation:
+          emit(state.copyWith(status: LoginStatus.emailConfirmationSent));
+      }
+    } on AuthError catch (e) {
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        errorMessage: e.message,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: LoginStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: 'Registratie is mislukt. Probeer het opnieuw.',
       ));
     }
   }
@@ -82,14 +114,22 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     LoginWithGooglePressed event,
     Emitter<LoginState> emit,
   ) async {
-    emit(state.copyWith(status: LoginStatus.submitting));
+    emit(state.copyWith(status: LoginStatus.submitting, clearError: true));
     try {
       await _authRepository.signInWithGoogle();
-      emit(state.copyWith(status: LoginStatus.success));
+      // OAuth opens an external browser. The actual sign-in will be handled
+      // by the auth state change stream when the user returns to the app.
+      // Reset to initial so the UI is not stuck in "submitting" state.
+      emit(state.copyWith(status: LoginStatus.initial, clearError: true));
+    } on AuthError catch (e) {
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        errorMessage: e.message,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: LoginStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: 'Inloggen met Google is mislukt. Probeer het opnieuw.',
       ));
     }
   }
@@ -98,16 +138,21 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     LoginWithApplePressed event,
     Emitter<LoginState> emit,
   ) async {
-    emit(state.copyWith(status: LoginStatus.submitting));
+    emit(state.copyWith(status: LoginStatus.submitting, clearError: true));
     try {
       await _authRepository.signInWithApple();
-      emit(state.copyWith(status: LoginStatus.success));
+      // OAuth opens an external browser. Reset to initial state.
+      emit(state.copyWith(status: LoginStatus.initial, clearError: true));
+    } on AuthError catch (e) {
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        errorMessage: e.message,
+      ));
     } catch (e) {
       emit(state.copyWith(
         status: LoginStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: 'Inloggen met Apple is mislukt. Probeer het opnieuw.',
       ));
     }
   }
-
 }

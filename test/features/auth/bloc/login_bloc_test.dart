@@ -73,7 +73,9 @@ void main() {
           when(() => authRepository.signInWithEmailAndPassword(
                 any(),
                 any(),
-              )).thenThrow(Exception('Invalid credentials'));
+              )).thenThrow(
+            const AuthError('Onjuist e-mailadres of wachtwoord.'),
+          );
           return LoginBloc(authRepository: authRepository);
         },
         seed: () => const LoginState(
@@ -91,7 +93,20 @@ void main() {
             email: 'test@example.com',
             password: 'wrong',
             status: LoginStatus.failure,
-            errorMessage: 'Exception: Invalid credentials',
+            errorMessage: 'Onjuist e-mailadres of wachtwoord.',
+          ),
+        ],
+      );
+
+      blocTest<LoginBloc, LoginState>(
+        'emits failure when email or password is empty',
+        build: () => LoginBloc(authRepository: authRepository),
+        seed: () => const LoginState(email: '', password: ''),
+        act: (bloc) => bloc.add(const LoginWithEmailSubmitted()),
+        expect: () => [
+          const LoginState(
+            status: LoginStatus.failure,
+            errorMessage: 'Vul je e-mailadres en wachtwoord in.',
           ),
         ],
       );
@@ -99,12 +114,12 @@ void main() {
 
     group('SignUpWithEmailSubmitted', () {
       blocTest<LoginBloc, LoginState>(
-        'emits [submitting, success] on successful sign up',
+        'emits [submitting, success] when email confirmation is not required',
         build: () {
           when(() => authRepository.createUserWithEmailAndPassword(
                 any(),
                 any(),
-              )).thenAnswer((_) async {});
+              )).thenAnswer((_) async => SignUpResult.authenticated);
           return LoginBloc(authRepository: authRepository);
         },
         seed: () => const LoginState(
@@ -125,11 +140,41 @@ void main() {
           ),
         ],
       );
+
+      blocTest<LoginBloc, LoginState>(
+        'emits [submitting, emailConfirmationSent] when email confirmation is required',
+        build: () {
+          when(() => authRepository.createUserWithEmailAndPassword(
+                any(),
+                any(),
+              )).thenAnswer(
+            (_) async => SignUpResult.needsEmailConfirmation,
+          );
+          return LoginBloc(authRepository: authRepository);
+        },
+        seed: () => const LoginState(
+          email: 'new@example.com',
+          password: 'password123',
+        ),
+        act: (bloc) => bloc.add(const SignUpWithEmailSubmitted()),
+        expect: () => [
+          const LoginState(
+            email: 'new@example.com',
+            password: 'password123',
+            status: LoginStatus.submitting,
+          ),
+          const LoginState(
+            email: 'new@example.com',
+            password: 'password123',
+            status: LoginStatus.emailConfirmationSent,
+          ),
+        ],
+      );
     });
 
     group('Social sign-in', () {
       blocTest<LoginBloc, LoginState>(
-        'emits [submitting, success] on Google sign in',
+        'emits [submitting, initial] on Google sign in (opens external browser)',
         build: () {
           when(() => authRepository.signInWithGoogle())
               .thenAnswer((_) async {});
@@ -138,15 +183,17 @@ void main() {
         act: (bloc) => bloc.add(const LoginWithGooglePressed()),
         expect: () => [
           const LoginState(status: LoginStatus.submitting),
-          const LoginState(status: LoginStatus.success),
+          const LoginState(status: LoginStatus.initial),
         ],
       );
 
       blocTest<LoginBloc, LoginState>(
         'emits [submitting, failure] on Google sign in error',
         build: () {
-          when(() => authRepository.signInWithGoogle())
-              .thenThrow(Exception('Google sign-in aborted'));
+          when(() => authRepository.signInWithGoogle()).thenThrow(
+            const AuthError(
+                'Inloggen met Google is mislukt. Probeer het opnieuw.'),
+          );
           return LoginBloc(authRepository: authRepository);
         },
         act: (bloc) => bloc.add(const LoginWithGooglePressed()),
@@ -154,13 +201,14 @@ void main() {
           const LoginState(status: LoginStatus.submitting),
           const LoginState(
             status: LoginStatus.failure,
-            errorMessage: 'Exception: Google sign-in aborted',
+            errorMessage:
+                'Inloggen met Google is mislukt. Probeer het opnieuw.',
           ),
         ],
       );
 
       blocTest<LoginBloc, LoginState>(
-        'emits [submitting, success] on Apple sign in',
+        'emits [submitting, initial] on Apple sign in (opens external browser)',
         build: () {
           when(() => authRepository.signInWithApple())
               .thenAnswer((_) async {});
@@ -169,10 +217,9 @@ void main() {
         act: (bloc) => bloc.add(const LoginWithApplePressed()),
         expect: () => [
           const LoginState(status: LoginStatus.submitting),
-          const LoginState(status: LoginStatus.success),
+          const LoginState(status: LoginStatus.initial),
         ],
       );
-
     });
   });
 }

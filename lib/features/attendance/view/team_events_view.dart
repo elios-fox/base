@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/models/team_event.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../bloc/event_list_bloc.dart';
@@ -49,17 +50,17 @@ class TeamEventsView extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.event_outlined,
-                              size: 64, color: Colors.grey),
+                              size: 64, color: AppColors.grey),
                           SizedBox(height: 16),
                           Text(
                             'Nog geen evenementen.',
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                            style: TextStyle(fontSize: 18, color: AppColors.grey),
                           ),
                           SizedBox(height: 8),
                           Text(
                             'Voeg een training of wedstrijd toe.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey),
+                            style: TextStyle(color: AppColors.grey),
                           ),
                         ],
                       ),

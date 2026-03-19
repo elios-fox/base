@@ -7,6 +7,8 @@ class Team extends Equatable {
     required this.ownerUid,
     required this.createdAt,
     this.memberUids = const [],
+    this.photoUrl,
+    this.dominantColor,
   });
 
   final String id;
@@ -14,6 +16,8 @@ class Team extends Equatable {
   final String ownerUid;
   final DateTime createdAt;
   final List<String> memberUids;
+  final String? photoUrl;
+  final String? dominantColor;
 
   Team copyWith({
     String? id,
@@ -21,6 +25,8 @@ class Team extends Equatable {
     String? ownerUid,
     DateTime? createdAt,
     List<String>? memberUids,
+    String? photoUrl,
+    String? dominantColor,
   }) {
     return Team(
       id: id ?? this.id,
@@ -28,9 +34,12 @@ class Team extends Equatable {
       ownerUid: ownerUid ?? this.ownerUid,
       createdAt: createdAt ?? this.createdAt,
       memberUids: memberUids ?? this.memberUids,
+      photoUrl: photoUrl ?? this.photoUrl,
+      dominantColor: dominantColor ?? this.dominantColor,
     );
   }
 
   @override
-  List<Object?> get props => [id, name, ownerUid, createdAt, memberUids];
+  List<Object?> get props =>
+      [id, name, ownerUid, createdAt, memberUids, photoUrl, dominantColor];
 }

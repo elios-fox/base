@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/models/checklist.dart';
+import '../../../core/theme/app_colors.dart';
 import '../bloc/checklists_bloc.dart';
 
 class ChecklistCard extends StatelessWidget {
@@ -18,7 +19,7 @@ class ChecklistCard extends StatelessWidget {
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 16),
-        color: Colors.red,
+        color: AppColors.error,
         child: const Icon(Icons.delete, color: Colors.white),
       ),
       confirmDismiss: (_) async {
@@ -71,7 +72,7 @@ class ChecklistCard extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child:
-                const Text('Verwijderen', style: TextStyle(color: Colors.red)),
+                const Text('Verwijderen', style: TextStyle(color: AppColors.error)),
           ),
         ],
       ),
@@ -115,9 +116,9 @@ class ChecklistCard extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
+              leading: const Icon(Icons.delete, color: AppColors.error),
               title: const Text('Verwijderen',
-                  style: TextStyle(color: Colors.red)),
+                  style: TextStyle(color: AppColors.error)),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _confirmDelete(context);
