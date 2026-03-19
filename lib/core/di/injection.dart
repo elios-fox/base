@@ -5,22 +5,15 @@ import '../../services/notification_service.dart';
 import '../../services/checklist_service.dart';
 import '../../services/team_service.dart';
 import '../auth/auth_repository.dart';
-import '../firestore/checklist_repository.dart';
-import '../firestore/team_repository.dart';
-import '../network/api_client.dart';
 import '../supabase/supabase_client.dart';
 import '../supabase/supabase_realtime.dart';
-import '../storage/storage_repository.dart';
+import '../supabase/supabase_storage.dart';
 
 final _registry = <Type, Object>{};
 
 void setupDependencies() {
-  // Legacy Firebase
-  _registry[ApiClient] = ApiClient();
+  // Auth (Firebase)
   _registry[AuthRepository] = FirebaseAuthRepository();
-  _registry[ChecklistRepository] = FirebaseChecklistRepository();
-  _registry[TeamRepository] = FirebaseTeamRepository();
-  _registry[StorageRepository] = FirebaseStorageRepository();
 
   // Supabase
   _registry[SupabaseClientWrapper] = SupabaseClientWrapper.instance;
@@ -31,6 +24,7 @@ void setupDependencies() {
   _registry[AttendanceService] = SupaAttendanceService();
   _registry[NotificationService] = SupaNotificationService();
   _registry[ChecklistService] = SupaChecklistService();
+  _registry[StorageService] = SupaStorageService();
 }
 
 T locate<T extends Object>() {

@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/firestore/team_repository.dart';
 import '../../../core/models/attendance.dart';
 import '../../../core/models/team_event.dart';
+import '../../../services/attendance_service.dart';
 
 // Events
 sealed class EventDetailEvent extends Equatable {
@@ -91,15 +91,15 @@ final class EventDetailState extends Equatable {
 
 // Bloc
 class EventDetailBloc extends Bloc<EventDetailEvent, EventDetailState> {
-  EventDetailBloc({required TeamRepository teamRepository})
-      : _teamRepository = teamRepository,
+  EventDetailBloc({required AttendanceService attendanceService})
+      : _attendanceService = attendanceService,
         super(const EventDetailState()) {
     on<EventDetailLoadRequested>(_onLoadRequested);
     on<EventDetailAttendancesUpdated>(_onAttendancesUpdated);
     on<AttendanceSubmitted>(_onAttendanceSubmitted);
   }
 
-  final TeamRepository _teamRepository;
+  final AttendanceService _attendanceService;
   StreamSubscription<List<Attendance>>? _subscription;
 
   Future<void> _onLoadRequested(
@@ -108,7 +108,7 @@ class EventDetailBloc extends Bloc<EventDetailEvent, EventDetailState> {
   ) async {
     emit(state.copyWith(status: EventDetailStatus.loading));
     await _subscription?.cancel();
-    _subscription = _teamRepository.attendances(event.eventId).listen(
+    _subscription = _attendanceService.getAttendances(event.eventId).listen(
           (attendances) => add(EventDetailAttendancesUpdated(attendances)),
         );
   }
@@ -127,16 +127,13 @@ class EventDetailBloc extends Bloc<EventDetailEvent, EventDetailState> {
     AttendanceSubmitted event,
     Emitter<EventDetailState> emit,
   ) async {
-    final id = '${event.eventId}_${event.userUid}';
-    final attendance = Attendance(
-      id: id,
+    await _attendanceService.submitAttendance(
       eventId: event.eventId,
-      userUid: event.userUid,
+      userId: event.userUid,
       userName: event.userName,
       status: event.status,
       reason: event.reason,
     );
-    await _teamRepository.saveAttendance(attendance);
   }
 
   @override

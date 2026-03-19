@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 import 'checklist_item.dart';
@@ -32,30 +31,6 @@ class Checklist extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       items: items ?? this.items,
     );
-  }
-
-  factory Checklist.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data()!;
-    final itemsList = (data['items'] as List<dynamic>?)
-            ?.map((e) => ChecklistItem.fromMap(e as Map<String, dynamic>))
-            .toList() ??
-        [];
-    return Checklist(
-      id: doc.id,
-      title: data['title'] as String,
-      ownerUid: data['ownerUid'] as String,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      items: itemsList,
-    );
-  }
-
-  Map<String, dynamic> toFirestore() {
-    return {
-      'title': title,
-      'ownerUid': ownerUid,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'items': items.map((e) => e.toMap()).toList(),
-    };
   }
 
   @override

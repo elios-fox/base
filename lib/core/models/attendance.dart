@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 enum AttendanceStatus { aanwezig, afwezig, onzeker }
@@ -36,29 +35,6 @@ class Attendance extends Equatable {
       status: status ?? this.status,
       reason: reason ?? this.reason,
     );
-  }
-
-  factory Attendance.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data()!;
-    return Attendance(
-      id: doc.id,
-      eventId: data['eventId'] as String,
-      userUid: data['userUid'] as String,
-      userName: data['userName'] as String,
-      status: AttendanceStatus.values.byName(data['status'] as String),
-      reason: data['reason'] as String? ?? '',
-    );
-  }
-
-  Map<String, dynamic> toFirestore() {
-    return {
-      'eventId': eventId,
-      'userUid': userUid,
-      'userName': userName,
-      'status': status.name,
-      'reason': reason,
-    };
   }
 
   @override

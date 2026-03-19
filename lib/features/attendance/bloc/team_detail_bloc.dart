@@ -2,8 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/firestore/team_repository.dart';
 import '../../../core/models/team.dart';
+import '../../../services/team_service.dart';
 
 // Events
 sealed class TeamDetailEvent extends Equatable {
@@ -66,15 +66,15 @@ final class TeamDetailState extends Equatable {
 
 // Bloc
 class TeamDetailBloc extends Bloc<TeamDetailEvent, TeamDetailState> {
-  TeamDetailBloc({required TeamRepository teamRepository})
-      : _teamRepository = teamRepository,
+  TeamDetailBloc({required TeamService teamService})
+      : _teamService = teamService,
         super(const TeamDetailState()) {
     on<TeamDetailLoadRequested>(_onLoadRequested);
     on<TeamDetailMemberRemoved>(_onMemberRemoved);
     on<TeamDetailInviteCodeCopied>(_onInviteCodeCopied);
   }
 
-  final TeamRepository _teamRepository;
+  final TeamService _teamService;
 
   Future<void> _onLoadRequested(
     TeamDetailLoadRequested event,
@@ -82,7 +82,7 @@ class TeamDetailBloc extends Bloc<TeamDetailEvent, TeamDetailState> {
   ) async {
     emit(state.copyWith(status: TeamDetailStatus.loading));
     try {
-      final team = await _teamRepository.getTeam(event.teamId);
+      final team = await _teamService.getTeam(event.teamId);
       emit(state.copyWith(status: TeamDetailStatus.loaded, team: team));
     } catch (_) {
       emit(state.copyWith(status: TeamDetailStatus.failure));
@@ -97,7 +97,7 @@ class TeamDetailBloc extends Bloc<TeamDetailEvent, TeamDetailState> {
     final updatedMembers =
         state.team!.memberUids.where((uid) => uid != event.memberUid).toList();
     final updatedTeam = state.team!.copyWith(memberUids: updatedMembers);
-    await _teamRepository.saveTeam(updatedTeam);
+    await _teamService.updateTeam(updatedTeam);
     emit(state.copyWith(team: updatedTeam));
   }
 

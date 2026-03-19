@@ -8,14 +8,14 @@ import '../../../helpers/fakes.dart';
 import '../../../helpers/mocks.dart';
 
 void main() {
-  late MockTeamRepository mockTeamRepository;
+  late MockTeamService mockTeamService;
 
   setUpAll(() {
     registerFallbackValue(fakeTeam());
   });
 
   setUp(() {
-    mockTeamRepository = MockTeamRepository();
+    mockTeamService = MockTeamService();
   });
 
   group('TeamListBloc', () {
@@ -32,9 +32,9 @@ void main() {
     blocTest<TeamListBloc, TeamListState>(
       'emits [loading, loaded] when TeamListLoadRequested succeeds',
       build: () {
-        when(() => mockTeamRepository.teams('u1'))
+        when(() => mockTeamService.getTeams('u1'))
             .thenAnswer((_) => Stream.value(teams));
-        return TeamListBloc(teamRepository: mockTeamRepository);
+        return TeamListBloc(teamService: mockTeamService);
       },
       act: (bloc) => bloc.add(const TeamListLoadRequested(userUid: 'u1')),
       expect: () => [
@@ -46,9 +46,9 @@ void main() {
     blocTest<TeamListBloc, TeamListState>(
       'emits [loading, loaded] with empty list when no teams',
       build: () {
-        when(() => mockTeamRepository.teams('u1'))
+        when(() => mockTeamService.getTeams('u1'))
             .thenAnswer((_) => Stream.value([]));
-        return TeamListBloc(teamRepository: mockTeamRepository);
+        return TeamListBloc(teamService: mockTeamService);
       },
       act: (bloc) => bloc.add(const TeamListLoadRequested(userUid: 'u1')),
       expect: () => [
@@ -60,32 +60,32 @@ void main() {
     blocTest<TeamListBloc, TeamListState>(
       'calls deleteTeam on TeamDeleteRequested',
       build: () {
-        when(() => mockTeamRepository.deleteTeam('1'))
+        when(() => mockTeamService.deleteTeam('1'))
             .thenAnswer((_) async {});
-        return TeamListBloc(teamRepository: mockTeamRepository);
+        return TeamListBloc(teamService: mockTeamService);
       },
       act: (bloc) => bloc.add(const TeamDeleteRequested('1')),
       verify: (_) {
-        verify(() => mockTeamRepository.deleteTeam('1')).called(1);
+        verify(() => mockTeamService.deleteTeam('1')).called(1);
       },
     );
 
     blocTest<TeamListBloc, TeamListState>(
-      'calls saveTeam on TeamCreateRequested',
+      'calls createTeam on TeamCreateRequested',
       build: () {
-        when(() => mockTeamRepository.saveTeam(any()))
-            .thenAnswer((_) async {});
-        return TeamListBloc(teamRepository: mockTeamRepository);
+        when(() => mockTeamService.createTeam(any(), any(), any()))
+            .thenAnswer((_) async => fakeTeam());
+        return TeamListBloc(teamService: mockTeamService);
       },
       act: (bloc) =>
           bloc.add(const TeamCreateRequested(name: 'Test', ownerUid: 'u1')),
       verify: (_) {
-        verify(() => mockTeamRepository.saveTeam(any())).called(1);
+        verify(() => mockTeamService.createTeam('Test', 'u1', '')).called(1);
       },
     );
 
     test('initial state is correct', () {
-      final bloc = TeamListBloc(teamRepository: mockTeamRepository);
+      final bloc = TeamListBloc(teamService: mockTeamService);
       expect(bloc.state, const TeamListState());
       expect(bloc.state.status, TeamListStatus.initial);
       expect(bloc.state.teams, isEmpty);

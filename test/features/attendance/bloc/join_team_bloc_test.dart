@@ -7,19 +7,19 @@ import '../../../helpers/fakes.dart';
 import '../../../helpers/mocks.dart';
 
 void main() {
-  late MockTeamRepository mockTeamRepository;
+  late MockTeamService mockTeamService;
 
   setUpAll(() {
     registerFallbackValue(fakeTeam());
   });
 
   setUp(() {
-    mockTeamRepository = MockTeamRepository();
+    mockTeamService = MockTeamService();
   });
 
   group('JoinTeamBloc', () {
     test('initial state is correct', () {
-      final bloc = JoinTeamBloc(teamRepository: mockTeamRepository);
+      final bloc = JoinTeamBloc(teamService: mockTeamService);
       expect(bloc.state, const JoinTeamState());
       expect(bloc.state.status, JoinTeamStatus.initial);
       expect(bloc.state.code, '');
@@ -29,7 +29,7 @@ void main() {
 
     blocTest<JoinTeamBloc, JoinTeamState>(
       'emits state with updated code when JoinTeamCodeChanged is added',
-      build: () => JoinTeamBloc(teamRepository: mockTeamRepository),
+      build: () => JoinTeamBloc(teamService: mockTeamService),
       act: (bloc) => bloc.add(const JoinTeamCodeChanged('ABC123')),
       expect: () => [
         const JoinTeamState(code: 'ABC123', status: JoinTeamStatus.initial),
@@ -38,7 +38,7 @@ void main() {
 
     blocTest<JoinTeamBloc, JoinTeamState>(
       'emits failure with error message when code is empty on submit',
-      build: () => JoinTeamBloc(teamRepository: mockTeamRepository),
+      build: () => JoinTeamBloc(teamService: mockTeamService),
       act: (bloc) => bloc.add(const JoinTeamSubmitted(userUid: 'user-1')),
       expect: () => [
         const JoinTeamState(
@@ -50,7 +50,7 @@ void main() {
 
     blocTest<JoinTeamBloc, JoinTeamState>(
       'emits failure with error message when code is only whitespace on submit',
-      build: () => JoinTeamBloc(teamRepository: mockTeamRepository),
+      build: () => JoinTeamBloc(teamService: mockTeamService),
       seed: () => const JoinTeamState(code: '   '),
       act: (bloc) => bloc.add(const JoinTeamSubmitted(userUid: 'user-1')),
       expect: () => [
@@ -65,9 +65,9 @@ void main() {
     blocTest<JoinTeamBloc, JoinTeamState>(
       'emits [submitting, success] when code is valid and submit succeeds',
       build: () {
-        when(() => mockTeamRepository.joinTeamByCode('ABC123', 'user-1'))
+        when(() => mockTeamService.joinTeam('ABC123'))
             .thenAnswer((_) async => fakeTeam(name: 'Heren 1'));
-        return JoinTeamBloc(teamRepository: mockTeamRepository);
+        return JoinTeamBloc(teamService: mockTeamService);
       },
       seed: () => const JoinTeamState(code: 'ABC123'),
       act: (bloc) => bloc.add(const JoinTeamSubmitted(userUid: 'user-1')),

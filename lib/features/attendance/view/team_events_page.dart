@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/di/injection.dart';
-import '../../../core/firestore/team_repository.dart';
+import '../../../services/event_service.dart';
 import '../bloc/event_list_bloc.dart';
 import 'team_events_view.dart';
 
@@ -20,7 +20,7 @@ class TeamEventsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => EventListBloc(
-        teamRepository: locate<TeamRepository>(),
+        eventService: locate<EventService>(),
       )..add(EventListLoadRequested(teamId: teamId)),
       child: TeamEventsView(teamId: teamId, teamName: teamName),
     );

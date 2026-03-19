@@ -8,14 +8,14 @@ import '../../../helpers/fakes.dart';
 import '../../../helpers/mocks.dart';
 
 void main() {
-  late MockTeamRepository mockTeamRepository;
+  late MockEventService mockEventService;
 
   setUpAll(() {
     registerFallbackValue(fakeEvent());
   });
 
   setUp(() {
-    mockTeamRepository = MockTeamRepository();
+    mockEventService = MockEventService();
   });
 
   group('EventListBloc', () {
@@ -28,9 +28,9 @@ void main() {
     blocTest<EventListBloc, EventListState>(
       'emits [loading, loaded] when EventListLoadRequested succeeds',
       build: () {
-        when(() => mockTeamRepository.events('team-1'))
+        when(() => mockEventService.getEvents('team-1'))
             .thenAnswer((_) => Stream.value(events));
-        return EventListBloc(teamRepository: mockTeamRepository);
+        return EventListBloc(eventService: mockEventService);
       },
       act: (bloc) =>
           bloc.add(const EventListLoadRequested(teamId: 'team-1')),
@@ -41,34 +41,34 @@ void main() {
     );
 
     blocTest<EventListBloc, EventListState>(
-      'calls saveEvent on EventCreateRequested',
+      'calls createEvent on EventCreateRequested',
       build: () {
-        when(() => mockTeamRepository.saveEvent(any()))
-            .thenAnswer((_) async {});
-        return EventListBloc(teamRepository: mockTeamRepository);
+        when(() => mockEventService.createEvent(any()))
+            .thenAnswer((_) async => fakeEvent());
+        return EventListBloc(eventService: mockEventService);
       },
       act: (bloc) =>
           bloc.add(EventCreateRequested(event: fakeEvent())),
       verify: (_) {
-        verify(() => mockTeamRepository.saveEvent(any())).called(1);
+        verify(() => mockEventService.createEvent(any())).called(1);
       },
     );
 
     blocTest<EventListBloc, EventListState>(
       'calls deleteEvent on EventDeleteRequested',
       build: () {
-        when(() => mockTeamRepository.deleteEvent('1'))
+        when(() => mockEventService.deleteEvent('1'))
             .thenAnswer((_) async {});
-        return EventListBloc(teamRepository: mockTeamRepository);
+        return EventListBloc(eventService: mockEventService);
       },
       act: (bloc) => bloc.add(const EventDeleteRequested('1')),
       verify: (_) {
-        verify(() => mockTeamRepository.deleteEvent('1')).called(1);
+        verify(() => mockEventService.deleteEvent('1')).called(1);
       },
     );
 
     test('initial state is correct', () {
-      final bloc = EventListBloc(teamRepository: mockTeamRepository);
+      final bloc = EventListBloc(eventService: mockEventService);
       expect(bloc.state.status, EventListStatus.initial);
       expect(bloc.state.events, isEmpty);
     });

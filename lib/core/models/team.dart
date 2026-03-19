@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 class Team extends Equatable {
@@ -30,26 +29,6 @@ class Team extends Equatable {
       createdAt: createdAt ?? this.createdAt,
       memberUids: memberUids ?? this.memberUids,
     );
-  }
-
-  factory Team.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data()!;
-    return Team(
-      id: doc.id,
-      name: data['name'] as String,
-      ownerUid: data['ownerUid'] as String,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      memberUids: List<String>.from(data['memberUids'] as List? ?? []),
-    );
-  }
-
-  Map<String, dynamic> toFirestore() {
-    return {
-      'name': name,
-      'ownerUid': ownerUid,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'memberUids': memberUids,
-    };
   }
 
   @override

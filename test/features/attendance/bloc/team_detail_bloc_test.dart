@@ -8,19 +8,19 @@ import '../../../helpers/fakes.dart';
 import '../../../helpers/mocks.dart';
 
 void main() {
-  late MockTeamRepository mockTeamRepository;
+  late MockTeamService mockTeamService;
 
   setUpAll(() {
     registerFallbackValue(fakeTeam());
   });
 
   setUp(() {
-    mockTeamRepository = MockTeamRepository();
+    mockTeamService = MockTeamService();
   });
 
   group('TeamDetailBloc', () {
     test('initial state is correct', () {
-      final bloc = TeamDetailBloc(teamRepository: mockTeamRepository);
+      final bloc = TeamDetailBloc(teamService: mockTeamService);
       expect(bloc.state, const TeamDetailState());
       expect(bloc.state.status, TeamDetailStatus.initial);
       expect(bloc.state.team, isNull);
@@ -31,9 +31,9 @@ void main() {
       'emits [loading, loaded] when TeamDetailLoadRequested succeeds',
       build: () {
         final team = fakeTeam();
-        when(() => mockTeamRepository.getTeam('team-1'))
+        when(() => mockTeamService.getTeam('team-1'))
             .thenAnswer((_) async => team);
-        return TeamDetailBloc(teamRepository: mockTeamRepository);
+        return TeamDetailBloc(teamService: mockTeamService);
       },
       act: (bloc) => bloc.add(const TeamDetailLoadRequested('team-1')),
       expect: () => [
@@ -45,9 +45,9 @@ void main() {
     blocTest<TeamDetailBloc, TeamDetailState>(
       'emits [loading, failure] when TeamDetailLoadRequested fails',
       build: () {
-        when(() => mockTeamRepository.getTeam('team-1'))
+        when(() => mockTeamService.getTeam('team-1'))
             .thenThrow(Exception('not found'));
-        return TeamDetailBloc(teamRepository: mockTeamRepository);
+        return TeamDetailBloc(teamService: mockTeamService);
       },
       act: (bloc) => bloc.add(const TeamDetailLoadRequested('team-1')),
       expect: () => [
@@ -59,9 +59,9 @@ void main() {
     blocTest<TeamDetailBloc, TeamDetailState>(
       'removes member and saves updated team on TeamDetailMemberRemoved',
       build: () {
-        when(() => mockTeamRepository.saveTeam(any()))
+        when(() => mockTeamService.updateTeam(any()))
             .thenAnswer((_) async {});
-        return TeamDetailBloc(teamRepository: mockTeamRepository);
+        return TeamDetailBloc(teamService: mockTeamService);
       },
       seed: () => TeamDetailState(
         status: TeamDetailStatus.loaded,
@@ -79,7 +79,7 @@ void main() {
       ],
       verify: (_) {
         final captured = verify(
-          () => mockTeamRepository.saveTeam(captureAny()),
+          () => mockTeamService.updateTeam(captureAny()),
         ).captured;
         final savedTeam = captured.first;
         expect(savedTeam.memberUids, ['user-1', 'user-3']);
@@ -88,7 +88,7 @@ void main() {
 
     blocTest<TeamDetailBloc, TeamDetailState>(
       'does nothing on TeamDetailMemberRemoved when team is null',
-      build: () => TeamDetailBloc(teamRepository: mockTeamRepository),
+      build: () => TeamDetailBloc(teamService: mockTeamService),
       act: (bloc) => bloc.add(const TeamDetailMemberRemoved(
         teamId: 'team-1',
         memberUid: 'user-2',
@@ -112,7 +112,7 @@ void main() {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(SystemChannels.platform, null);
       },
-      build: () => TeamDetailBloc(teamRepository: mockTeamRepository),
+      build: () => TeamDetailBloc(teamService: mockTeamService),
       act: (bloc) =>
           bloc.add(const TeamDetailInviteCodeCopied('INVITE-CODE-123')),
       wait: const Duration(seconds: 3),

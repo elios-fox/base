@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/auth/auth_bloc.dart';
 import '../../../core/di/injection.dart';
-import '../../../core/firestore/team_repository.dart';
+import '../../../services/team_service.dart';
 import '../bloc/team_list_bloc.dart';
 import 'team_list_view.dart';
 
@@ -15,7 +15,7 @@ class TeamListPage extends StatelessWidget {
     final uid = context.read<AuthBloc>().state.user!.uid;
     return BlocProvider(
       create: (_) => TeamListBloc(
-        teamRepository: locate<TeamRepository>(),
+        teamService: locate<TeamService>(),
       )..add(TeamListLoadRequested(userUid: uid)),
       child: const TeamListView(),
     );

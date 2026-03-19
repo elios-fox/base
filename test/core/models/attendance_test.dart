@@ -58,24 +58,6 @@ void main() {
       expect(updated.userName, 'Jan');
     });
 
-    test('toFirestore returns correct map', () {
-      const att = Attendance(
-        id: '1',
-        eventId: 'e1',
-        userUid: 'u1',
-        userName: 'Jan',
-        status: AttendanceStatus.onzeker,
-        reason: 'Misschien laat',
-      );
-      final map = att.toFirestore();
-
-      expect(map['eventId'], 'e1');
-      expect(map['userUid'], 'u1');
-      expect(map['userName'], 'Jan');
-      expect(map['status'], 'onzeker');
-      expect(map['reason'], 'Misschien laat');
-    });
-
     test('AttendanceStatus has correct values', () {
       expect(AttendanceStatus.values.length, 3);
       expect(AttendanceStatus.aanwezig.name, 'aanwezig');

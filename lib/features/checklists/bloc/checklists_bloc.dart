@@ -1,21 +1,21 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/firestore/checklist_repository.dart';
 import '../../../core/models/checklist.dart';
+import '../../../services/checklist_service.dart';
 
 part 'checklists_event.dart';
 part 'checklists_state.dart';
 
 class ChecklistsBloc extends Bloc<ChecklistsEvent, ChecklistsState> {
-  ChecklistsBloc({required ChecklistRepository checklistRepository})
-      : _checklistRepository = checklistRepository,
+  ChecklistsBloc({required ChecklistService checklistService})
+      : _checklistService = checklistService,
         super(const ChecklistsState()) {
     on<ChecklistsLoadRequested>(_onLoadRequested);
     on<ChecklistsChecklistDeleted>(_onChecklistDeleted);
   }
 
-  final ChecklistRepository _checklistRepository;
+  final ChecklistService _checklistService;
 
   Future<void> _onLoadRequested(
     ChecklistsLoadRequested event,
@@ -23,7 +23,7 @@ class ChecklistsBloc extends Bloc<ChecklistsEvent, ChecklistsState> {
   ) {
     emit(state.copyWith(status: ChecklistsStatus.loading));
     return emit.forEach<List<Checklist>>(
-      _checklistRepository.checklists(event.ownerUid),
+      _checklistService.getChecklists(event.ownerUid),
       onData: (checklists) => state.copyWith(
         status: ChecklistsStatus.loaded,
         checklists: checklists,
@@ -36,6 +36,6 @@ class ChecklistsBloc extends Bloc<ChecklistsEvent, ChecklistsState> {
     ChecklistsChecklistDeleted event,
     Emitter<ChecklistsState> emit,
   ) async {
-    await _checklistRepository.deleteChecklist(event.id);
+    await _checklistService.deleteChecklist(event.id);
   }
 }

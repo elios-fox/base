@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/firestore/team_repository.dart';
 import '../../../core/models/team.dart';
+import '../../../services/team_service.dart';
 
 // Events
 sealed class TeamListEvent extends Equatable {
@@ -75,8 +75,8 @@ final class TeamListState extends Equatable {
 
 // Bloc
 class TeamListBloc extends Bloc<TeamListEvent, TeamListState> {
-  TeamListBloc({required TeamRepository teamRepository})
-      : _teamRepository = teamRepository,
+  TeamListBloc({required TeamService teamService})
+      : _teamService = teamService,
         super(const TeamListState()) {
     on<TeamListLoadRequested>(_onLoadRequested);
     on<TeamListUpdated>(_onUpdated);
@@ -84,7 +84,7 @@ class TeamListBloc extends Bloc<TeamListEvent, TeamListState> {
     on<TeamDeleteRequested>(_onDeleteRequested);
   }
 
-  final TeamRepository _teamRepository;
+  final TeamService _teamService;
   StreamSubscription<List<Team>>? _subscription;
 
   Future<void> _onLoadRequested(
@@ -93,7 +93,7 @@ class TeamListBloc extends Bloc<TeamListEvent, TeamListState> {
   ) async {
     emit(state.copyWith(status: TeamListStatus.loading));
     await _subscription?.cancel();
-    _subscription = _teamRepository.teams(event.userUid).listen(
+    _subscription = _teamService.getTeams(event.userUid).listen(
           (teams) => add(TeamListUpdated(teams)),
         );
   }
@@ -112,21 +112,14 @@ class TeamListBloc extends Bloc<TeamListEvent, TeamListState> {
     TeamCreateRequested event,
     Emitter<TeamListState> emit,
   ) async {
-    final team = Team(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      name: event.name,
-      ownerUid: event.ownerUid,
-      createdAt: DateTime.now(),
-      memberUids: [event.ownerUid],
-    );
-    await _teamRepository.saveTeam(team);
+    await _teamService.createTeam(event.name, event.ownerUid, '');
   }
 
   Future<void> _onDeleteRequested(
     TeamDeleteRequested event,
     Emitter<TeamListState> emit,
   ) async {
-    await _teamRepository.deleteTeam(event.teamId);
+    await _teamService.deleteTeam(event.teamId);
   }
 
   @override

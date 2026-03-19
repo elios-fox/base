@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/auth/auth_bloc.dart';
 import '../../../core/di/injection.dart';
-import '../../../core/firestore/checklist_repository.dart';
+import '../../../services/checklist_service.dart';
 import '../bloc/checklists_bloc.dart';
 import 'checklists_view.dart';
 
@@ -15,7 +15,7 @@ class ChecklistsPage extends StatelessWidget {
     final uid = context.read<AuthBloc>().state.user!.uid;
     return BlocProvider(
       create: (_) => ChecklistsBloc(
-        checklistRepository: locate<ChecklistRepository>(),
+        checklistService: locate<ChecklistService>(),
       )..add(ChecklistsLoadRequested(ownerUid: uid)),
       child: const ChecklistsView(),
     );

@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/firestore/checklist_repository.dart';
 import '../../../core/models/checklist.dart';
 import '../../../core/models/checklist_item.dart';
-import '../../../core/storage/storage_repository.dart';
+import '../../../core/supabase/supabase_storage.dart';
+import '../../../services/checklist_service.dart';
 
 part 'checklist_create_event.dart';
 part 'checklist_create_state.dart';
@@ -14,11 +14,11 @@ part 'checklist_create_state.dart';
 class ChecklistCreateBloc
     extends Bloc<ChecklistCreateEvent, ChecklistCreateState> {
   ChecklistCreateBloc({
-    required ChecklistRepository checklistRepository,
-    required StorageRepository storageRepository,
+    required ChecklistService checklistService,
+    required StorageService storageService,
     required String ownerUid,
-  })  : _checklistRepository = checklistRepository,
-        _storageRepository = storageRepository,
+  })  : _checklistService = checklistService,
+        _storageService = storageService,
         _ownerUid = ownerUid,
         super(const ChecklistCreateState()) {
     on<ChecklistCreateStarted>(_onStarted);
@@ -31,8 +31,8 @@ class ChecklistCreateBloc
     on<ChecklistCreateSubmitted>(_onSubmitted);
   }
 
-  final ChecklistRepository _checklistRepository;
-  final StorageRepository _storageRepository;
+  final ChecklistService _checklistService;
+  final StorageService _storageService;
   final String _ownerUid;
   String? _existingId;
 
@@ -43,7 +43,7 @@ class ChecklistCreateBloc
     if (event.existingId != null) {
       emit(state.copyWith(status: ChecklistCreateStatus.loading));
       final checklist =
-          await _checklistRepository.getChecklist(event.existingId!);
+          await _checklistService.getChecklist(event.existingId!);
       if (checklist != null) {
         _existingId = checklist.id;
         emit(state.copyWith(
@@ -101,7 +101,7 @@ class ChecklistCreateBloc
     _existingId ??= checklistId;
 
     final path = 'checklists/$checklistId/${item.id}.jpg';
-    final url = await _storageRepository.uploadImage(path, event.photo);
+    final url = await _storageService.uploadImage(path, event.photo);
 
     final items = [...state.items];
     items[event.index] = item.copyWith(photoUrl: () => url);
@@ -140,17 +140,22 @@ class ChecklistCreateBloc
     emit(state.copyWith(status: ChecklistCreateStatus.saving));
 
     try {
-      final id =
-          _existingId ?? DateTime.now().millisecondsSinceEpoch.toString();
-      final checklist = Checklist(
-        id: id,
-        title: state.title.trim(),
-        ownerUid: _ownerUid,
-        createdAt: DateTime.now(),
-        items: state.items,
-      );
-      await _checklistRepository.saveChecklist(checklist)
-          .timeout(const Duration(seconds: 5));
+      if (_existingId == null) {
+        await _checklistService.createChecklist(
+          title: state.title.trim(),
+          ownerUid: _ownerUid,
+          items: state.items,
+        );
+      } else {
+        final checklist = Checklist(
+          id: _existingId!,
+          title: state.title.trim(),
+          ownerUid: _ownerUid,
+          createdAt: DateTime.now(),
+          items: state.items,
+        );
+        await _checklistService.updateChecklist(checklist);
+      }
       emit(state.copyWith(status: ChecklistCreateStatus.success));
     } catch (e) {
       emit(state.copyWith(

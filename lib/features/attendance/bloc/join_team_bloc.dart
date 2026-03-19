@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/firestore/team_repository.dart';
+import '../../../services/team_service.dart';
 
 // Events
 sealed class JoinTeamEvent extends Equatable {
@@ -64,14 +64,14 @@ final class JoinTeamState extends Equatable {
 
 // Bloc
 class JoinTeamBloc extends Bloc<JoinTeamEvent, JoinTeamState> {
-  JoinTeamBloc({required TeamRepository teamRepository})
-      : _teamRepository = teamRepository,
+  JoinTeamBloc({required TeamService teamService})
+      : _teamService = teamService,
         super(const JoinTeamState()) {
     on<JoinTeamCodeChanged>(_onCodeChanged);
     on<JoinTeamSubmitted>(_onSubmitted);
   }
 
-  final TeamRepository _teamRepository;
+  final TeamService _teamService;
 
   void _onCodeChanged(
     JoinTeamCodeChanged event,
@@ -98,10 +98,7 @@ class JoinTeamBloc extends Bloc<JoinTeamEvent, JoinTeamState> {
     emit(state.copyWith(status: JoinTeamStatus.submitting));
 
     try {
-      final team = await _teamRepository.joinTeamByCode(
-        state.code.trim(),
-        event.userUid,
-      );
+      final team = await _teamService.joinTeam(state.code.trim());
       emit(state.copyWith(
         status: JoinTeamStatus.success,
         teamName: team.name,

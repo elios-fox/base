@@ -42,25 +42,6 @@ void main() {
       expect(updated.teamId, 't1');
     });
 
-    test('toFirestore returns correct map', () {
-      final event = TeamEvent(
-        id: '1',
-        teamId: 't1',
-        title: 'Training',
-        type: EventType.training,
-        dateTime: DateTime(2026, 3, 20, 19, 0),
-        location: 'Sportpark',
-        notes: 'Neem scheenbeschermers mee',
-      );
-      final map = event.toFirestore();
-
-      expect(map['teamId'], 't1');
-      expect(map['title'], 'Training');
-      expect(map['type'], 'training');
-      expect(map['location'], 'Sportpark');
-      expect(map['notes'], 'Neem scheenbeschermers mee');
-    });
-
     test('EventType has correct values', () {
       expect(EventType.values.length, 2);
       expect(EventType.training.name, 'training');

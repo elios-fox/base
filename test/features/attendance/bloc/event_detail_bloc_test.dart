@@ -8,14 +8,15 @@ import '../../../helpers/fakes.dart';
 import '../../../helpers/mocks.dart';
 
 void main() {
-  late MockTeamRepository mockTeamRepository;
+  late MockAttendanceService mockAttendanceService;
 
   setUpAll(() {
     registerFallbackValue(fakeAttendance());
+    registerFallbackValue(AttendanceStatus.aanwezig);
   });
 
   setUp(() {
-    mockTeamRepository = MockTeamRepository();
+    mockAttendanceService = MockAttendanceService();
   });
 
   group('EventDetailBloc', () {
@@ -28,9 +29,9 @@ void main() {
     blocTest<EventDetailBloc, EventDetailState>(
       'emits [loading, loaded] when EventDetailLoadRequested succeeds',
       build: () {
-        when(() => mockTeamRepository.attendances('event-1'))
+        when(() => mockAttendanceService.getAttendances('event-1'))
             .thenAnswer((_) => Stream.value(attendances));
-        return EventDetailBloc(teamRepository: mockTeamRepository);
+        return EventDetailBloc(attendanceService: mockAttendanceService);
       },
       act: (bloc) =>
           bloc.add(const EventDetailLoadRequested(eventId: 'event-1')),
@@ -55,11 +56,16 @@ void main() {
     });
 
     blocTest<EventDetailBloc, EventDetailState>(
-      'calls saveAttendance with composite ID on AttendanceSubmitted',
+      'calls submitAttendance on AttendanceSubmitted',
       build: () {
-        when(() => mockTeamRepository.saveAttendance(any()))
-            .thenAnswer((_) async {});
-        return EventDetailBloc(teamRepository: mockTeamRepository);
+        when(() => mockAttendanceService.submitAttendance(
+              eventId: any(named: 'eventId'),
+              userId: any(named: 'userId'),
+              userName: any(named: 'userName'),
+              status: any(named: 'status'),
+              reason: any(named: 'reason'),
+            )).thenAnswer((_) async {});
+        return EventDetailBloc(attendanceService: mockAttendanceService);
       },
       act: (bloc) => bloc.add(const AttendanceSubmitted(
         eventId: 'event-1',
@@ -68,17 +74,18 @@ void main() {
         status: AttendanceStatus.aanwezig,
       )),
       verify: (_) {
-        final captured = verify(
-          () => mockTeamRepository.saveAttendance(captureAny()),
-        ).captured;
-        final attendance = captured.first as Attendance;
-        expect(attendance.id, 'event-1_user-1');
-        expect(attendance.status, AttendanceStatus.aanwezig);
+        verify(() => mockAttendanceService.submitAttendance(
+              eventId: 'event-1',
+              userId: 'user-1',
+              userName: 'Jan',
+              status: AttendanceStatus.aanwezig,
+              reason: '',
+            )).called(1);
       },
     );
 
     test('initial state is correct', () {
-      final bloc = EventDetailBloc(teamRepository: mockTeamRepository);
+      final bloc = EventDetailBloc(attendanceService: mockAttendanceService);
       expect(bloc.state.status, EventDetailStatus.initial);
       expect(bloc.state.attendances, isEmpty);
       expect(bloc.state.event, isNull);

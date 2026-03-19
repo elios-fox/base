@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/firestore/team_repository.dart';
 import '../../../core/models/team_event.dart';
+import '../../../services/event_service.dart';
 
 // Events
 sealed class EventListEvent extends Equatable {
@@ -74,8 +74,8 @@ final class EventListState extends Equatable {
 
 // Bloc
 class EventListBloc extends Bloc<EventListEvent, EventListState> {
-  EventListBloc({required TeamRepository teamRepository})
-      : _teamRepository = teamRepository,
+  EventListBloc({required EventService eventService})
+      : _eventService = eventService,
         super(const EventListState()) {
     on<EventListLoadRequested>(_onLoadRequested);
     on<EventListUpdated>(_onUpdated);
@@ -83,7 +83,7 @@ class EventListBloc extends Bloc<EventListEvent, EventListState> {
     on<EventDeleteRequested>(_onDeleteRequested);
   }
 
-  final TeamRepository _teamRepository;
+  final EventService _eventService;
   StreamSubscription<List<TeamEvent>>? _subscription;
 
   Future<void> _onLoadRequested(
@@ -92,7 +92,7 @@ class EventListBloc extends Bloc<EventListEvent, EventListState> {
   ) async {
     emit(state.copyWith(status: EventListStatus.loading));
     await _subscription?.cancel();
-    _subscription = _teamRepository.events(event.teamId).listen(
+    _subscription = _eventService.getEvents(event.teamId).listen(
           (events) => add(EventListUpdated(events)),
         );
   }
@@ -111,14 +111,14 @@ class EventListBloc extends Bloc<EventListEvent, EventListState> {
     EventCreateRequested event,
     Emitter<EventListState> emit,
   ) async {
-    await _teamRepository.saveEvent(event.event);
+    await _eventService.createEvent(event.event);
   }
 
   Future<void> _onDeleteRequested(
     EventDeleteRequested event,
     Emitter<EventListState> emit,
   ) async {
-    await _teamRepository.deleteEvent(event.eventId);
+    await _eventService.deleteEvent(event.eventId);
   }
 
   @override

@@ -62,19 +62,5 @@ void main() {
       expect(team.copyWith(), equals(team));
     });
 
-    test('toFirestore returns correct map', () {
-      final team = Team(
-        id: '1',
-        name: 'Heren 1',
-        ownerUid: 'u1',
-        createdAt: DateTime(2026, 1, 1),
-        memberUids: const ['u1', 'u2'],
-      );
-      final map = team.toFirestore();
-
-      expect(map['name'], 'Heren 1');
-      expect(map['ownerUid'], 'u1');
-      expect(map['memberUids'], ['u1', 'u2']);
-    });
   });
 }

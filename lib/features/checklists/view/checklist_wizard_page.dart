@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/di/injection.dart';
-import '../../../core/firestore/checklist_repository.dart';
+import '../../../services/checklist_service.dart';
 import '../bloc/checklist_wizard_bloc.dart';
 import 'checklist_wizard_view.dart';
 
@@ -24,8 +24,8 @@ class ChecklistWizardPage extends StatelessWidget {
   }
 
   Future<void> _loadChecklist(ChecklistWizardBloc bloc) async {
-    final repo = locate<ChecklistRepository>();
-    final checklist = await repo.getChecklist(checklistId);
+    final service = locate<ChecklistService>();
+    final checklist = await service.getChecklist(checklistId);
     if (checklist != null) {
       bloc.add(ChecklistWizardStarted(checklist));
     }
