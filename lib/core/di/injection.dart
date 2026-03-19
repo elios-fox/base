@@ -1,5 +1,4 @@
 import '../../services/attendance_service.dart';
-import '../../services/auth_service.dart';
 import '../../services/event_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/checklist_service.dart';
@@ -12,13 +11,12 @@ import '../supabase/supabase_storage.dart';
 final _registry = <Type, Object>{};
 
 void setupDependencies() {
-  // Auth (Firebase)
-  _registry[AuthRepository] = FirebaseAuthRepository();
+  // Auth (Supabase)
+  _registry[AuthRepository] = SupabaseAuthRepository();
 
   // Supabase
   _registry[SupabaseClientWrapper] = SupabaseClientWrapper.instance;
   _registry[SupabaseRealtime] = SupabaseRealtime();
-  _registry[AuthService] = SupaAuthService();
   _registry[TeamService] = SupaTeamService();
   _registry[EventService] = SupaEventService();
   _registry[AttendanceService] = SupaAttendanceService();

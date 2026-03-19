@@ -179,7 +179,7 @@ create policy "Users can view own notifications" on public.notifications
 create policy "Users can update own notifications" on public.notifications
   for update using (auth.uid() = user_id);
 
--- System can insert notifications (via service role)
+-- System can insert notifications (via triggers with security definer)
 create policy "Service can insert notifications" on public.notifications
   for insert with check (true);
 
@@ -364,8 +364,8 @@ begin
   where id = team_record.id;
 
   return jsonb_build_object(
-    'teamId', team_record.id,
-    'teamName', team_record.name
+    'team_id', team_record.id,
+    'team_name', team_record.name
   );
 end;
 $$ language plpgsql security definer;

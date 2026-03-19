@@ -1,33 +1,11 @@
 abstract final class AppConfig {
-  static const String supabaseUrlDev = 'http://127.0.0.1:54321';
-  static const String supabaseUrlStaging = 'https://your-project.supabase.co';
-  static const String supabaseUrlProd = 'https://your-project.supabase.co';
+  static const supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://xhnorfsckgdbrdxsrbjp.supabase.co',
+  );
 
-  static const String supabaseAnonKeyDev = 'your-dev-anon-key';
-  static const String supabaseAnonKeyStaging = 'your-staging-anon-key';
-  static const String supabaseAnonKeyProd = 'your-prod-anon-key';
-
-  static const _env = String.fromEnvironment('ENV', defaultValue: 'dev');
-
-  static String get supabaseUrl {
-    switch (_env) {
-      case 'prod':
-        return supabaseUrlProd;
-      case 'staging':
-        return supabaseUrlStaging;
-      default:
-        return supabaseUrlDev;
-    }
-  }
-
-  static String get supabaseAnonKey {
-    switch (_env) {
-      case 'prod':
-        return supabaseAnonKeyProd;
-      case 'staging':
-        return supabaseAnonKeyStaging;
-      default:
-        return supabaseAnonKeyDev;
-    }
-  }
+  static const supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhobm9yZnNja2dkYnJkeHNyYmpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTkxNTUsImV4cCI6MjA4OTQ5NTE1NX0.V34Q6rLeoguL5ybVDmgokHbzh9U76oAWjYRtUhKXYX0',
+  );
 }

@@ -67,6 +67,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       await _authRepository.createUserWithEmailAndPassword(
         state.email,
         state.password,
+        name: state.name.isNotEmpty ? state.name : null,
       );
       emit(state.copyWith(status: LoginStatus.success));
     } catch (e) {

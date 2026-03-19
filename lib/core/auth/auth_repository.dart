@@ -1,8 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthUser extends Equatable {
   const AuthUser({
@@ -23,97 +20,68 @@ class AuthUser extends Equatable {
 
 abstract class AuthRepository {
   Stream<AuthUser?> get authStateChanges;
-
   Future<void> signInWithGoogle();
   Future<void> signInWithApple();
   Future<void> signInWithEmailAndPassword(String email, String password);
-  Future<void> createUserWithEmailAndPassword(String email, String password);
+  Future<void> createUserWithEmailAndPassword(String email, String password,
+      {String? name});
   Future<void> signOut();
 }
 
-class FirebaseAuthRepository implements AuthRepository {
-  FirebaseAuthRepository({
-    firebase_auth.FirebaseAuth? firebaseAuth,
-  }) : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance;
+class SupabaseAuthRepository implements AuthRepository {
+  SupabaseAuthRepository({SupabaseClient? supabase})
+      : _supabase = supabase ?? Supabase.instance.client;
 
-  final firebase_auth.FirebaseAuth _firebaseAuth;
+  final SupabaseClient _supabase;
 
   @override
   Stream<AuthUser?> get authStateChanges {
-    return _firebaseAuth.authStateChanges().map((firebaseUser) {
-      if (firebaseUser == null) return null;
+    return _supabase.auth.onAuthStateChange.map((event) {
+      final user = event.session?.user;
+      if (user == null) return null;
       return AuthUser(
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        displayName: firebaseUser.displayName,
-        photoUrl: firebaseUser.photoURL,
+        uid: user.id,
+        email: user.email,
+        displayName: user.userMetadata?['name'] as String?,
+        photoUrl: user.userMetadata?['avatar_url'] as String?,
       );
     });
   }
 
   @override
   Future<void> signInWithGoogle() async {
-    if (kIsWeb) {
-      final provider = firebase_auth.GoogleAuthProvider();
-      await _firebaseAuth.signInWithPopup(provider);
-    } else {
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) throw Exception('Google sign-in aborted');
-
-      final googleAuth = await googleUser.authentication;
-      final credential = firebase_auth.GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-      await _firebaseAuth.signInWithCredential(credential);
-    }
-  }
-
-  @override
-  Future<void> signInWithApple() async {
-    if (kIsWeb) {
-      final provider = firebase_auth.OAuthProvider('apple.com')
-        ..addScope('email')
-        ..addScope('name');
-      await _firebaseAuth.signInWithPopup(provider);
-    } else {
-      final appleCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
-
-      final oauthCredential =
-          firebase_auth.OAuthProvider('apple.com').credential(
-        idToken: appleCredential.identityToken,
-        accessToken: appleCredential.authorizationCode,
-      );
-      await _firebaseAuth.signInWithCredential(oauthCredential);
-    }
-  }
-
-  @override
-  Future<void> signInWithEmailAndPassword(String email, String password) async {
-    await _firebaseAuth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
+    await _supabase.auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: 'nl.com.club.manager://login-callback',
     );
   }
 
   @override
-  Future<void> createUserWithEmailAndPassword(
-    String email,
-    String password,
-  ) async {
-    await _firebaseAuth.createUserWithEmailAndPassword(
+  Future<void> signInWithApple() async {
+    await _supabase.auth.signInWithOAuth(
+      OAuthProvider.apple,
+      redirectTo: 'nl.com.club.manager://login-callback',
+    );
+  }
+
+  @override
+  Future<void> signInWithEmailAndPassword(
+      String email, String password) async {
+    await _supabase.auth.signInWithPassword(email: email, password: password);
+  }
+
+  @override
+  Future<void> createUserWithEmailAndPassword(String email, String password,
+      {String? name}) async {
+    await _supabase.auth.signUp(
       email: email,
       password: password,
+      data: name != null ? {'name': name} : null,
     );
   }
 
   @override
   Future<void> signOut() async {
-    await _firebaseAuth.signOut();
+    await _supabase.auth.signOut();
   }
 }
