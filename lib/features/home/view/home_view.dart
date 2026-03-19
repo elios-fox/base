@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../core/auth/auth_bloc.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../bloc/home_bloc.dart';
@@ -14,51 +13,14 @@ class HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Base')),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              child: Text(
-                'Menu',
-                style: TextStyle(fontSize: 24),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.checklist),
-              title: const Text('Checklists'),
-              onTap: () {
-                Navigator.of(context).pop();
-                context.go('/bardienst');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.groups),
-              title: const Text('Aanwezigheid'),
-              onTap: () {
-                Navigator.of(context).pop();
-                context.go('/attendance');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Uitloggen'),
-              onTap: () {
-                Navigator.of(context).pop();
-                context.read<AuthBloc>().add(const AuthLogoutRequested());
-              },
-            ),
-          ],
-        ),
-      ),
+      appBar: AppBar(title: const Text('ClubHub')),
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
           return switch (state.status) {
-            HomeStatus.initial || HomeStatus.loading => const LoadingIndicator(),
-            HomeStatus.success => Center(
-                child: HomeGreetingCard(greeting: state.greeting),
-              ),
+            HomeStatus.initial ||
+            HomeStatus.loading =>
+              const LoadingIndicator(),
+            HomeStatus.success => _HomeContent(greeting: state.greeting),
             HomeStatus.failure => ErrorView(
                 message: 'Er ging iets mis.',
                 onRetry: () =>
@@ -67,6 +29,62 @@ class HomeView extends StatelessWidget {
           };
         },
       ),
+    );
+  }
+}
+
+class _HomeContent extends StatelessWidget {
+  const _HomeContent({required this.greeting});
+
+  final String greeting;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ListView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      children: [
+        HomeGreetingCard(greeting: greeting),
+        const SizedBox(height: AppSpacing.xl),
+        Text(
+          'Komende events',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Text(
+              'Geen komende events',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        Text(
+          'Mijn teams',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Text(
+              'Geen teams',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

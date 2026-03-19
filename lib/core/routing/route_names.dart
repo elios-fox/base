@@ -2,7 +2,7 @@ abstract final class RouteNames {
   static const home = 'home';
   static const login = 'login';
   static const signUp = 'signUp';
-  static const bardienst = 'bardienst';
+  static const checklists = 'checklists';
   static const checklistCreate = 'checklistCreate';
   static const checklistEdit = 'checklistEdit';
   static const checklistDetail = 'checklistDetail';

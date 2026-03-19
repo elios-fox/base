@@ -8,10 +8,10 @@ import '../../features/attendance/view/team_events_page.dart';
 import '../../features/attendance/view/team_list_page.dart';
 import '../../features/auth/view/login_page.dart';
 import '../../features/auth/view/sign_up_page.dart';
-import '../../features/bardienst/view/bardienst_page.dart';
-import '../../features/bardienst/view/checklist_create_page.dart';
-import '../../features/bardienst/view/checklist_detail_page.dart';
-import '../../features/bardienst/view/checklist_wizard_page.dart';
+import '../../features/checklists/view/checklists_page.dart';
+import '../../features/checklists/view/checklist_create_page.dart';
+import '../../features/checklists/view/checklist_detail_page.dart';
+import '../../features/checklists/view/checklist_wizard_page.dart';
 import '../../features/home/view/home_page.dart';
 import '../../features/profile/view/profile_page.dart';
 import '../../features/shell/view/shell_page.dart';
@@ -127,12 +127,12 @@ GoRouter createAppRouter(AuthBloc authBloc) {
         ],
       ),
 
-      // Bardienst (accessible from anywhere)
+      // Checklists (accessible from anywhere)
       GoRoute(
-        path: '/bardienst',
-        name: RouteNames.bardienst,
+        path: '/checklists',
+        name: RouteNames.checklists,
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const BardienstPage(),
+        builder: (context, state) => const ChecklistsPage(),
         routes: [
           GoRoute(
             path: 'create',

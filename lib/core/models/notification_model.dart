@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:pocketbase/pocketbase.dart';
 
 enum NotificationType { eventReminder, attendanceRequest, teamInvite }
 
@@ -46,7 +45,7 @@ class AppNotification extends Equatable {
     );
   }
 
-  static NotificationType _parseType(String value) {
+  static NotificationType _parseType(String? value) {
     return switch (value) {
       'event_reminder' => NotificationType.eventReminder,
       'attendance_request' => NotificationType.attendanceRequest,
@@ -55,16 +54,16 @@ class AppNotification extends Equatable {
     };
   }
 
-  factory AppNotification.fromRecord(RecordModel record) {
+  factory AppNotification.fromJson(Map<String, dynamic> json) {
     return AppNotification(
-      id: record.id,
-      userId: record.getStringValue('userId'),
-      title: record.getStringValue('title'),
-      body: record.getStringValue('body'),
-      type: _parseType(record.getStringValue('type')),
-      read: record.getBoolValue('read'),
-      createdAt: DateTime.tryParse(record.get<String>('created')) ?? DateTime.now(),
-      data: record.get<Map<String, dynamic>>('data'),
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      title: json['title'] as String,
+      body: json['body'] as String? ?? '',
+      type: _parseType(json['type'] as String?),
+      read: json['read'] as bool? ?? false,
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+      data: json['data'] as Map<String, dynamic>? ?? const {},
     );
   }
 

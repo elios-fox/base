@@ -26,7 +26,27 @@ class SignUpView extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 8),
+              Text(
+                'Maak een account aan om te beginnen',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 32),
+              TextField(
+                key: const Key('nameField'),
+                onChanged: (name) =>
+                    context.read<LoginBloc>().add(LoginNameChanged(name)),
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                  labelText: 'Naam',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.person_outlined),
+                ),
+              ),
+              const SizedBox(height: 16),
               EmailPasswordForm(
                 submitLabel: 'Registreren',
                 showConfirmPassword: true,

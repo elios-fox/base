@@ -2,13 +2,14 @@ import '../../services/attendance_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/event_service.dart';
 import '../../services/notification_service.dart';
+import '../../services/checklist_service.dart';
 import '../../services/team_service.dart';
 import '../auth/auth_repository.dart';
 import '../firestore/checklist_repository.dart';
 import '../firestore/team_repository.dart';
 import '../network/api_client.dart';
-import '../pocketbase/pb_client.dart';
-import '../pocketbase/pb_realtime.dart';
+import '../supabase/supabase_client.dart';
+import '../supabase/supabase_realtime.dart';
 import '../storage/storage_repository.dart';
 
 final _registry = <Type, Object>{};
@@ -21,14 +22,15 @@ void setupDependencies() {
   _registry[TeamRepository] = FirebaseTeamRepository();
   _registry[StorageRepository] = FirebaseStorageRepository();
 
-  // PocketBase
-  _registry[PbClient] = PbClient.instance;
-  _registry[PbRealtime] = PbRealtime();
-  _registry[AuthService] = PbAuthService();
-  _registry[TeamService] = PbTeamService();
-  _registry[EventService] = PbEventService();
-  _registry[AttendanceService] = PbAttendanceService();
-  _registry[NotificationService] = PbNotificationService();
+  // Supabase
+  _registry[SupabaseClientWrapper] = SupabaseClientWrapper.instance;
+  _registry[SupabaseRealtime] = SupabaseRealtime();
+  _registry[AuthService] = SupaAuthService();
+  _registry[TeamService] = SupaTeamService();
+  _registry[EventService] = SupaEventService();
+  _registry[AttendanceService] = SupaAttendanceService();
+  _registry[NotificationService] = SupaNotificationService();
+  _registry[ChecklistService] = SupaChecklistService();
 }
 
 T locate<T extends Object>() {

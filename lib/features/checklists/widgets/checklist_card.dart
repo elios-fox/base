@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/models/checklist.dart';
-import '../bloc/bardienst_bloc.dart';
+import '../bloc/checklists_bloc.dart';
 
 class ChecklistCard extends StatelessWidget {
   const ChecklistCard({super.key, required this.checklist});
@@ -42,8 +42,8 @@ class ChecklistCard extends StatelessWidget {
       },
       onDismissed: (_) {
         context
-            .read<BardienstBloc>()
-            .add(BardienstChecklistDeleted(id: checklist.id));
+            .read<ChecklistsBloc>()
+            .add(ChecklistsChecklistDeleted(id: checklist.id));
       },
       child: Card(
         child: ListTile(
@@ -78,8 +78,8 @@ class ChecklistCard extends StatelessWidget {
     );
     if (confirmed == true && context.mounted) {
       context
-          .read<BardienstBloc>()
-          .add(BardienstChecklistDeleted(id: checklist.id));
+          .read<ChecklistsBloc>()
+          .add(ChecklistsChecklistDeleted(id: checklist.id));
     }
   }
 
@@ -95,7 +95,7 @@ class ChecklistCard extends StatelessWidget {
               title: const Text('Als checklist doorlopen'),
               onTap: () {
                 Navigator.of(ctx).pop();
-                context.go('/bardienst/${checklist.id}');
+                context.go('/checklists/${checklist.id}');
               },
             ),
             ListTile(
@@ -103,7 +103,7 @@ class ChecklistCard extends StatelessWidget {
               title: const Text('Als wizard doorlopen'),
               onTap: () {
                 Navigator.of(ctx).pop();
-                context.go('/bardienst/${checklist.id}/wizard');
+                context.go('/checklists/${checklist.id}/wizard');
               },
             ),
             ListTile(
@@ -111,7 +111,7 @@ class ChecklistCard extends StatelessWidget {
               title: const Text('Bewerken'),
               onTap: () {
                 Navigator.of(ctx).pop();
-                context.go('/bardienst/edit/${checklist.id}');
+                context.go('/checklists/edit/${checklist.id}');
               },
             ),
             ListTile(

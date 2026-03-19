@@ -1,8 +1,8 @@
-import 'package:pocketbase/pocketbase.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/models/attendance.dart';
-import '../core/pocketbase/pb_client.dart';
-import '../core/pocketbase/pb_realtime.dart';
+import '../core/supabase/supabase_client.dart';
+import '../core/supabase/supabase_realtime.dart';
 
 abstract class AttendanceService {
   Stream<List<Attendance>> getAttendances(String eventId);
@@ -32,25 +32,29 @@ class AttendanceStats {
   final int total;
 }
 
-class PbAttendanceService implements AttendanceService {
-  PbAttendanceService({PbClient? client, PbRealtime? realtime})
-      : _client = client ?? PbClient.instance,
-        _realtime = realtime ?? PbRealtime();
+class SupaAttendanceService implements AttendanceService {
+  SupaAttendanceService({
+    SupabaseClientWrapper? client,
+    SupabaseRealtime? realtime,
+  })  : _client = client ?? SupabaseClientWrapper.instance,
+        _realtime = realtime ?? SupabaseRealtime();
 
-  final PbClient _client;
-  final PbRealtime _realtime;
+  final SupabaseClientWrapper _client;
+  final SupabaseRealtime _realtime;
 
-  PocketBase get _pb => _client.pb;
+  SupabaseClient get _supabase => _client.client;
 
   @override
   Stream<List<Attendance>> getAttendances(String eventId) {
     return _realtime
         .subscribeToList(
           'attendances',
-          filter: 'eventId = "$eventId"',
-          sort: 'userName',
+          column: 'event_id',
+          value: eventId,
+          orderBy: 'user_name',
+          ascending: true,
         )
-        .map((records) => records.map(_attendanceFromRecord).toList());
+        .map((rows) => rows.map(_attendanceFromMap).toList());
   }
 
   @override
@@ -61,51 +65,45 @@ class PbAttendanceService implements AttendanceService {
     required AttendanceStatus status,
     String reason = '',
   }) async {
-    // Check of er al een attendance bestaat
-    try {
-      final existing = await _pb.collection('attendances').getFirstListItem(
-            'eventId = "$eventId" && userUid = "$userId"',
-          );
-      // Update bestaande
-      await _pb.collection('attendances').update(existing.id, body: {
+    await _supabase.from('attendances').upsert(
+      {
+        'event_id': eventId,
+        'user_uid': userId,
+        'user_name': userName,
         'status': status.name,
         'reason': reason,
-        'respondedAt': DateTime.now().toUtc().toIso8601String(),
-      });
-    } on ClientException {
-      // Nieuwe attendance aanmaken
-      await _pb.collection('attendances').create(body: {
-        'eventId': eventId,
-        'userUid': userId,
-        'userName': userName,
-        'status': status.name,
-        'reason': reason,
-        'respondedAt': DateTime.now().toUtc().toIso8601String(),
-      });
-    }
+        'responded_at': DateTime.now().toUtc().toIso8601String(),
+      },
+      onConflict: 'event_id,user_uid',
+    );
   }
 
   @override
   Future<Attendance?> getMyAttendance(String eventId, String userId) async {
     try {
-      final record = await _pb.collection('attendances').getFirstListItem(
-            'eventId = "$eventId" && userUid = "$userId"',
-          );
-      return _attendanceFromRecord(record);
-    } on ClientException {
+      final data = await _supabase
+          .from('attendances')
+          .select()
+          .eq('event_id', eventId)
+          .eq('user_uid', userId)
+          .maybeSingle();
+      if (data == null) return null;
+      return _attendanceFromMap(data);
+    } on PostgrestException {
       return null;
     }
   }
 
   @override
   Future<AttendanceStats> getStats(String eventId) async {
-    final records = await _pb.collection('attendances').getFullList(
-          filter: 'eventId = "$eventId"',
-        );
+    final data = await _supabase
+        .from('attendances')
+        .select()
+        .eq('event_id', eventId);
 
     int aanwezig = 0, afwezig = 0, onzeker = 0;
-    for (final record in records) {
-      switch (record.getStringValue('status')) {
+    for (final row in data) {
+      switch (row['status'] as String) {
         case 'aanwezig':
           aanwezig++;
         case 'afwezig':
@@ -118,29 +116,30 @@ class PbAttendanceService implements AttendanceService {
       aanwezig: aanwezig,
       afwezig: afwezig,
       onzeker: onzeker,
-      total: records.length,
+      total: data.length,
     );
   }
 
   @override
   Future<List<Attendance>> getUserHistory(
       String userId, String teamId) async {
-    final records = await _pb.collection('attendances').getFullList(
-          filter: 'userUid = "$userId"',
-          sort: '-respondedAt',
-          expand: 'eventId',
-        );
-    return records.map(_attendanceFromRecord).toList();
+    final data = await _supabase
+        .from('attendances')
+        .select('*, events!inner(team_id)')
+        .eq('user_uid', userId)
+        .eq('events.team_id', teamId)
+        .order('responded_at', ascending: false);
+    return data.map(_attendanceFromMap).toList();
   }
 
-  Attendance _attendanceFromRecord(RecordModel record) {
+  Attendance _attendanceFromMap(Map<String, dynamic> map) {
     return Attendance(
-      id: record.id,
-      eventId: record.getStringValue('eventId'),
-      userUid: record.getStringValue('userUid'),
-      userName: record.getStringValue('userName'),
-      status: AttendanceStatus.values.byName(record.getStringValue('status')),
-      reason: record.getStringValue('reason'),
+      id: map['id'] as String,
+      eventId: map['event_id'] as String,
+      userUid: map['user_uid'] as String,
+      userName: map['user_name'] as String,
+      status: AttendanceStatus.values.byName(map['status'] as String),
+      reason: map['reason'] as String? ?? '',
     );
   }
 }

@@ -1,73 +1,72 @@
-import 'dart:async';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:pocketbase/pocketbase.dart';
-
-import '../core/pocketbase/pb_client.dart';
+import '../core/supabase/supabase_client.dart';
 
 abstract class AuthService {
-  Future<RecordAuth> login(String email, String password);
-  Future<RecordAuth> register(String email, String password, String name);
+  Future<AuthResponse> login(String email, String password);
+  Future<AuthResponse> register(String email, String password, String name);
   Future<void> loginWithOAuth2(String provider);
   Future<void> logout();
   bool get isAuthenticated;
-  RecordModel? get currentUser;
-  Stream<RecordModel?> get authStateChanges;
+  User? get currentUser;
+  Stream<AuthState> get authStateChanges;
 }
 
-class PbAuthService implements AuthService {
-  PbAuthService({PbClient? client}) : _client = client ?? PbClient.instance;
+class SupaAuthService implements AuthService {
+  SupaAuthService({SupabaseClientWrapper? client})
+      : _client = client ?? SupabaseClientWrapper.instance;
 
-  final PbClient _client;
-  final _authController = StreamController<RecordModel?>.broadcast();
-
-  PocketBase get _pb => _client.pb;
+  final SupabaseClientWrapper _client;
+  SupabaseClient get _supabase => _client.client;
 
   @override
-  Future<RecordAuth> login(String email, String password) async {
-    final result = await _pb.collection('users').authWithPassword(
-          email,
-          password,
-        );
-    _authController.add(result.record);
-    return result;
+  bool get isAuthenticated => _supabase.auth.currentUser != null;
+
+  @override
+  User? get currentUser => _supabase.auth.currentUser;
+
+  @override
+  Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;
+
+  @override
+  Future<AuthResponse> login(String email, String password) async {
+    try {
+      return await _supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+    } on AuthException {
+      rethrow;
+    }
   }
 
   @override
-  Future<RecordAuth> register(
+  Future<AuthResponse> register(
       String email, String password, String name) async {
-    await _pb.collection('users').create(body: {
-      'email': email,
-      'password': password,
-      'passwordConfirm': password,
-      'name': name,
-    });
-    return login(email, password);
+    try {
+      return await _supabase.auth.signUp(
+        email: email,
+        password: password,
+        data: {'name': name},
+      );
+    } on AuthException {
+      rethrow;
+    }
   }
 
   @override
   Future<void> loginWithOAuth2(String provider) async {
-    final result = await _pb.collection('users').authWithOAuth2(
-          provider,
-          (url) async {
-            // URL moet geopend worden in een browser.
-            // De Flutter app moet dit afhandelen via url_launcher.
-          },
-        );
-    _authController.add(result.record);
+    try {
+      await _supabase.auth.signInWithOAuth(
+        OAuthProvider.values.firstWhere((p) => p.name == provider),
+      );
+    } on AuthException {
+      rethrow;
+    }
   }
 
   @override
   Future<void> logout() async {
-    _pb.authStore.clear();
-    _authController.add(null);
+    await _supabase.auth.signOut();
   }
-
-  @override
-  bool get isAuthenticated => _pb.authStore.isValid;
-
-  @override
-  RecordModel? get currentUser => _pb.authStore.record;
-
-  @override
-  Stream<RecordModel?> get authStateChanges => _authController.stream;
 }

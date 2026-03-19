@@ -9,6 +9,7 @@ abstract class TeamRepository {
   Future<Team?> getTeam(String id);
   Future<void> saveTeam(Team team);
   Future<void> deleteTeam(String teamId);
+  Future<Team> joinTeamByCode(String code, String userUid);
   Stream<List<TeamEvent>> events(String teamId);
   Future<void> saveEvent(TeamEvent event);
   Future<void> deleteEvent(String eventId);
@@ -59,6 +60,23 @@ class FirebaseTeamRepository implements TeamRepository {
   @override
   Future<void> deleteTeam(String teamId) async {
     await _teams.doc(teamId).delete();
+  }
+
+  @override
+  Future<Team> joinTeamByCode(String code, String userUid) async {
+    final doc = await _teams.doc(code).get();
+    if (!doc.exists) {
+      throw Exception('Team niet gevonden met deze code.');
+    }
+    final team = Team.fromFirestore(doc);
+    if (team.memberUids.contains(userUid)) {
+      return team;
+    }
+    final updatedTeam = team.copyWith(
+      memberUids: [...team.memberUids, userUid],
+    );
+    await _teams.doc(team.id).set(updatedTeam.toFirestore());
+    return updatedTeam;
   }
 
   @override

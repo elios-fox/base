@@ -3,6 +3,7 @@ name: TestFlight Deploy
 on:
   push:
     branches: [develop]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -32,7 +33,10 @@ jobs:
           bundler-cache: true
           working-directory: ios
 
-      - run: flutter build ios --release --no-codesign
+      - name: Set build number
+        run: echo "BUILD_NUMBER=$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
+
+      - run: flutter build ios --release --no-codesign --build-number=${{ env.BUILD_NUMBER }}
 
       - name: Deploy to TestFlight
         working-directory: ios

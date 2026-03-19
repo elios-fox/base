@@ -15,46 +15,6 @@ class TeamListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Teams')),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              child: Text('Menu', style: TextStyle(fontSize: 24)),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Home'),
-              onTap: () {
-                Navigator.of(context).pop();
-                context.go('/');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.checklist),
-              title: const Text('Checklists'),
-              onTap: () {
-                Navigator.of(context).pop();
-                context.go('/bardienst');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.groups),
-              title: const Text('Aanwezigheid'),
-              selected: true,
-              onTap: () => Navigator.of(context).pop(),
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Uitloggen'),
-              onTap: () {
-                Navigator.of(context).pop();
-                context.read<AuthBloc>().add(const AuthLogoutRequested());
-              },
-            ),
-          ],
-        ),
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreateTeamDialog(context),
         child: const Icon(Icons.add),

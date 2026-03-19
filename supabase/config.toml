@@ -1,0 +1,19 @@
+[project]
+id = "clubhub"
+
+[api]
+port = 54321
+
+[db]
+port = 54322
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["io.supabase.clubhub://login-callback/"]
+enable_signup = true
+
+[auth.external.google]
+enabled = true
+
+[auth.external.apple]
+enabled = true

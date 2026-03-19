@@ -93,7 +93,7 @@ class ChecklistWizardView extends StatelessWidget {
                               child: const Text('Volgende'),
                             )
                           : FilledButton(
-                              onPressed: () => context.go('/bardienst'),
+                              onPressed: () => context.go('/checklists'),
                               child: const Text('Voltooi'),
                             ),
                     ),

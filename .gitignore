@@ -63,7 +63,12 @@ firebase.json
 /android/.gradle/
 android/build/
 /ios/Pods/
+/ios/vendor/
 /web/build/
+
+# iOS build artifacts
+ios/.bundle/
+ios/Gemfile.lock
 
 # Code signing
 *.p12

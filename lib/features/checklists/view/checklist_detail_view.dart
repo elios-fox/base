@@ -27,7 +27,7 @@ class ChecklistDetailView extends StatelessWidget {
                 icon: const Icon(Icons.swipe),
                 tooltip: 'Wizard modus',
                 onPressed: () =>
-                    context.go('/bardienst/${checklist.id}/wizard'),
+                    context.go('/checklists/${checklist.id}/wizard'),
               ),
             ],
           ),

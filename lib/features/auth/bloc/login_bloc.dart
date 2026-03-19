@@ -12,6 +12,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         super(const LoginState()) {
     on<LoginEmailChanged>(_onEmailChanged);
     on<LoginPasswordChanged>(_onPasswordChanged);
+    on<LoginNameChanged>(_onNameChanged);
     on<LoginWithEmailSubmitted>(_onEmailSubmitted);
     on<SignUpWithEmailSubmitted>(_onSignUpSubmitted);
     on<LoginWithGooglePressed>(_onGooglePressed);
@@ -29,6 +30,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) {
     emit(state.copyWith(password: event.password));
+  }
+
+  void _onNameChanged(
+    LoginNameChanged event,
+    Emitter<LoginState> emit,
+  ) {
+    emit(state.copyWith(name: event.name));
   }
 
   Future<void> _onEmailSubmitted(

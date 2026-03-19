@@ -1,8 +1,8 @@
-import 'package:pocketbase/pocketbase.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/models/notification_model.dart';
-import '../core/pocketbase/pb_client.dart';
-import '../core/pocketbase/pb_realtime.dart';
+import '../core/supabase/supabase_client.dart';
+import '../core/supabase/supabase_realtime.dart';
 
 abstract class NotificationService {
   Stream<List<AppNotification>> getNotifications(String userId);
@@ -11,53 +11,54 @@ abstract class NotificationService {
   Future<int> getUnreadCount(String userId);
 }
 
-class PbNotificationService implements NotificationService {
-  PbNotificationService({PbClient? client, PbRealtime? realtime})
-      : _client = client ?? PbClient.instance,
-        _realtime = realtime ?? PbRealtime();
+class SupaNotificationService implements NotificationService {
+  SupaNotificationService({
+    SupabaseClientWrapper? client,
+    SupabaseRealtime? realtime,
+  })  : _client = client ?? SupabaseClientWrapper.instance,
+        _realtime = realtime ?? SupabaseRealtime();
 
-  final PbClient _client;
-  final PbRealtime _realtime;
+  final SupabaseClientWrapper _client;
+  final SupabaseRealtime _realtime;
 
-  PocketBase get _pb => _client.pb;
+  SupabaseClient get _supabase => _client.client;
 
   @override
   Stream<List<AppNotification>> getNotifications(String userId) {
     return _realtime
         .subscribeToList(
           'notifications',
-          filter: 'userId = "$userId"',
-          sort: '-created',
+          column: 'user_id',
+          value: userId,
+          orderBy: 'created_at',
+          ascending: false,
         )
-        .map((records) =>
-            records.map(AppNotification.fromRecord).toList());
+        .map((rows) => rows.map(AppNotification.fromJson).toList());
   }
 
   @override
   Future<void> markAsRead(String notificationId) async {
-    await _pb.collection('notifications').update(notificationId, body: {
+    await _supabase.from('notifications').update({
       'read': true,
-    });
+    }).eq('id', notificationId);
   }
 
   @override
   Future<void> markAllAsRead(String userId) async {
-    final records = await _pb.collection('notifications').getFullList(
-          filter: 'userId = "$userId" && read = false',
-        );
-    for (final record in records) {
-      await _pb.collection('notifications').update(record.id, body: {
-        'read': true,
-      });
-    }
+    await _supabase
+        .from('notifications')
+        .update({'read': true})
+        .eq('user_id', userId)
+        .eq('read', false);
   }
 
   @override
   Future<int> getUnreadCount(String userId) async {
-    final result = await _pb.collection('notifications').getList(
-          filter: 'userId = "$userId" && read = false',
-          perPage: 1,
-        );
-    return result.totalItems;
+    final data = await _supabase
+        .from('notifications')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('read', false);
+    return data.length;
   }
 }

@@ -4,20 +4,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/auth/auth_bloc.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/firestore/checklist_repository.dart';
-import '../bloc/bardienst_bloc.dart';
-import 'bardienst_view.dart';
+import '../bloc/checklists_bloc.dart';
+import 'checklists_view.dart';
 
-class BardienstPage extends StatelessWidget {
-  const BardienstPage({super.key});
+class ChecklistsPage extends StatelessWidget {
+  const ChecklistsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final uid = context.read<AuthBloc>().state.user!.uid;
     return BlocProvider(
-      create: (_) => BardienstBloc(
+      create: (_) => ChecklistsBloc(
         checklistRepository: locate<ChecklistRepository>(),
-      )..add(BardienstLoadRequested(ownerUid: uid)),
-      child: const BardienstView(),
+      )..add(ChecklistsLoadRequested(ownerUid: uid)),
+      child: const ChecklistsView(),
     );
   }
 }

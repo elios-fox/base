@@ -5,11 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../../core/auth/auth_bloc.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
-import '../bloc/bardienst_bloc.dart';
+import '../bloc/checklists_bloc.dart';
 import '../widgets/checklist_card.dart';
 
-class BardienstView extends StatelessWidget {
-  const BardienstView({super.key});
+class ChecklistsView extends StatelessWidget {
+  const ChecklistsView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,20 +56,20 @@ class BardienstView extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/bardienst/create'),
+        onPressed: () => context.go('/checklists/create'),
         child: const Icon(Icons.add),
       ),
-      body: BlocBuilder<BardienstBloc, BardienstState>(
+      body: BlocBuilder<ChecklistsBloc, ChecklistsState>(
         builder: (context, state) {
           return switch (state.status) {
-            BardienstStatus.initial ||
-            BardienstStatus.loading =>
+            ChecklistsStatus.initial ||
+            ChecklistsStatus.loading =>
               const LoadingIndicator(),
-            BardienstStatus.failure => ErrorView(
+            ChecklistsStatus.failure => ErrorView(
                 message: 'Kon checklists niet laden.',
                 onRetry: () {},
               ),
-            BardienstStatus.loaded => state.checklists.isEmpty
+            ChecklistsStatus.loaded => state.checklists.isEmpty
                 ? const Center(
                     child: Text('Nog geen checklists. Maak er een aan!'),
                   )

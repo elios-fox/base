@@ -1,8 +1,8 @@
-import 'package:pocketbase/pocketbase.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/models/team_event.dart';
-import '../core/pocketbase/pb_client.dart';
-import '../core/pocketbase/pb_realtime.dart';
+import '../core/supabase/supabase_client.dart';
+import '../core/supabase/supabase_realtime.dart';
 
 abstract class EventService {
   Stream<List<TeamEvent>> getEvents(String teamId);
@@ -13,88 +13,92 @@ abstract class EventService {
   Future<List<TeamEvent>> getUpcomingEvents(String userId);
 }
 
-class PbEventService implements EventService {
-  PbEventService({PbClient? client, PbRealtime? realtime})
-      : _client = client ?? PbClient.instance,
-        _realtime = realtime ?? PbRealtime();
+class SupaEventService implements EventService {
+  SupaEventService({SupabaseClientWrapper? client, SupabaseRealtime? realtime})
+      : _client = client ?? SupabaseClientWrapper.instance,
+        _realtime = realtime ?? SupabaseRealtime();
 
-  final PbClient _client;
-  final PbRealtime _realtime;
+  final SupabaseClientWrapper _client;
+  final SupabaseRealtime _realtime;
 
-  PocketBase get _pb => _client.pb;
+  SupabaseClient get _supabase => _client.client;
 
   @override
   Stream<List<TeamEvent>> getEvents(String teamId) {
     return _realtime
         .subscribeToList(
           'events',
-          filter: 'teamId = "$teamId"',
-          sort: 'dateTime',
+          column: 'team_id',
+          value: teamId,
+          orderBy: 'date_time',
+          ascending: true,
         )
-        .map((records) => records.map(_eventFromRecord).toList());
+        .map((rows) => rows.map(_eventFromMap).toList());
   }
 
   @override
   Future<TeamEvent?> getEvent(String id) async {
     try {
-      final record = await _pb.collection('events').getOne(id);
-      return _eventFromRecord(record);
-    } on ClientException {
+      final data =
+          await _supabase.from('events').select().eq('id', id).maybeSingle();
+      if (data == null) return null;
+      return _eventFromMap(data);
+    } on PostgrestException {
       return null;
     }
   }
 
   @override
   Future<TeamEvent> createEvent(TeamEvent event) async {
-    final record = await _pb.collection('events').create(body: {
-      'teamId': event.teamId,
+    final data = await _supabase.from('events').insert({
+      'team_id': event.teamId,
       'title': event.title,
       'type': event.type.name,
-      'dateTime': event.dateTime.toUtc().toIso8601String(),
+      'date_time': event.dateTime.toUtc().toIso8601String(),
       'location': event.location,
       'notes': event.notes,
       'recurring': false,
-    });
-    return _eventFromRecord(record);
+    }).select().single();
+    return _eventFromMap(data);
   }
 
   @override
   Future<void> updateEvent(TeamEvent event) async {
-    await _pb.collection('events').update(event.id, body: {
+    await _supabase.from('events').update({
       'title': event.title,
       'type': event.type.name,
-      'dateTime': event.dateTime.toUtc().toIso8601String(),
+      'date_time': event.dateTime.toUtc().toIso8601String(),
       'location': event.location,
       'notes': event.notes,
-    });
+    }).eq('id', event.id);
   }
 
   @override
   Future<void> deleteEvent(String id) async {
-    await _pb.collection('events').delete(id);
+    await _supabase.from('events').delete().eq('id', id);
   }
 
   @override
   Future<List<TeamEvent>> getUpcomingEvents(String userId) async {
     final now = DateTime.now().toUtc().toIso8601String();
-    final records = await _pb.collection('events').getFullList(
-          filter: 'dateTime >= "$now"',
-          sort: 'dateTime',
-          expand: 'teamId',
-        );
-    return records.map(_eventFromRecord).toList();
+    final data = await _supabase
+        .from('events')
+        .select()
+        .gte('date_time', now)
+        .order('date_time', ascending: true);
+    return data.map(_eventFromMap).toList();
   }
 
-  TeamEvent _eventFromRecord(RecordModel record) {
+  TeamEvent _eventFromMap(Map<String, dynamic> map) {
     return TeamEvent(
-      id: record.id,
-      teamId: record.getStringValue('teamId'),
-      title: record.getStringValue('title'),
-      type: EventType.values.byName(record.getStringValue('type')),
+      id: map['id'] as String,
+      teamId: map['team_id'] as String,
+      title: map['title'] as String,
+      type: EventType.values.byName(map['type'] as String),
       dateTime:
-          DateTime.tryParse(record.getStringValue('dateTime')) ?? DateTime.now(),
-      location: record.getStringValue('location'),
-      notes: record.getStringValue('notes'),
+          DateTime.tryParse(map['date_time'] as String? ?? '') ?? DateTime.now(),
+      location: map['location'] as String? ?? '',
+      notes: map['notes'] as String? ?? '',
     );
   }
 }

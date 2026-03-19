@@ -65,10 +65,13 @@ final class JoinTeamState extends Equatable {
 // Bloc
 class JoinTeamBloc extends Bloc<JoinTeamEvent, JoinTeamState> {
   JoinTeamBloc({required TeamRepository teamRepository})
-      : super(const JoinTeamState()) {
+      : _teamRepository = teamRepository,
+        super(const JoinTeamState()) {
     on<JoinTeamCodeChanged>(_onCodeChanged);
     on<JoinTeamSubmitted>(_onSubmitted);
   }
+
+  final TeamRepository _teamRepository;
 
   void _onCodeChanged(
     JoinTeamCodeChanged event,
@@ -95,16 +98,19 @@ class JoinTeamBloc extends Bloc<JoinTeamEvent, JoinTeamState> {
     emit(state.copyWith(status: JoinTeamStatus.submitting));
 
     try {
-      // In a real implementation, this would call the join API
-      // For now, we indicate success with a placeholder
+      final team = await _teamRepository.joinTeamByCode(
+        state.code.trim(),
+        event.userUid,
+      );
       emit(state.copyWith(
         status: JoinTeamStatus.success,
-        teamName: 'Team',
+        teamName: team.name,
+        teamId: team.id,
       ));
     } catch (e) {
       emit(state.copyWith(
         status: JoinTeamStatus.failure,
-        errorMessage: 'Code niet gevonden. Probeer opnieuw.',
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
       ));
     }
   }

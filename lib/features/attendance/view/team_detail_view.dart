@@ -60,7 +60,7 @@ class TeamDetailView extends StatelessWidget {
                                 const SizedBox(width: 8),
                                 const Text('Uitnodigingscode: '),
                                 Text(
-                                  'TEAM-CODE',
+                                  state.team!.id,
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     fontFamily: 'monospace',
                                   ),
@@ -70,8 +70,8 @@ class TeamDetailView extends StatelessWidget {
                                   icon: const Icon(Icons.copy, size: 20),
                                   onPressed: () {
                                     context.read<TeamDetailBloc>().add(
-                                          const TeamDetailInviteCodeCopied(
-                                              'TEAM-CODE'),
+                                          TeamDetailInviteCodeCopied(
+                                              state.team!.id),
                                         );
                                   },
                                 ),
@@ -158,7 +158,7 @@ class TeamDetailView extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: () {
                       context.read<TeamDetailBloc>().add(
-                            const TeamDetailInviteCodeCopied('TEAM-CODE'),
+                            TeamDetailInviteCodeCopied(state.team!.id),
                           );
                     },
                     icon: const Icon(Icons.share),

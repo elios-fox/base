@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'app.dart';
 import 'core/di/injection.dart';
+import 'core/supabase/supabase_client.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -10,6 +11,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await initSupabase();
   setupDependencies();
   runApp(const App());
 }

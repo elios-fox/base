@@ -1,9 +1,8 @@
-.PHONY: setup analyze test build-apk build-ios clean run pb-serve
+.PHONY: setup analyze test build-apk build-ios clean run
 
-## Install dependencies + download PocketBase
+## Install dependencies
 setup:
 	flutter pub get
-	@echo "Setup compleet. Start PocketBase met: make pb-serve"
 
 ## Run Flutter analyzer
 analyze:
@@ -29,7 +28,3 @@ clean:
 ## Run app in debug mode
 run:
 	flutter run
-
-## Start PocketBase lokaal
-pb-serve:
-	cd pocketbase && ./pocketbase serve --migrationsDir=../pb_migrations --hooksDir=../pb_hooks

@@ -2,11 +2,16 @@
 
 Automatische TestFlight deploys via GitHub Actions + Fastlane Match.
 
+## Backend
+
+De app gebruikt **Supabase** als backend (database, auth, edge functions). Configuratie staat in `supabase/config.toml` en migraties in `supabase/migrations/`.
+
 ## Vereisten
 
 - Apple Developer account met Admin-rol
 - App Store Connect app aangemaakt (Bundle ID: `nl.com.club.manager`)
 - GitHub repo: `elios-fox/base`
+- Supabase project met de juiste environment variabelen in GitHub Secrets
 
 ## Setup stappen
 
@@ -30,7 +35,7 @@ Match genereert een distribution certificate + provisioning profile en slaat ze 
 
 ### 3. App Store Connect API Key aanmaken
 
-1. Ga naar [App Store Connect → Users and Access → Integrations → App Store Connect API](https://appstoreconnect.apple.com/access/integrations/api)
+1. Ga naar [App Store Connect > Users and Access > Integrations > App Store Connect API](https://appstoreconnect.apple.com/access/integrations/api)
 2. Klik op **Generate API Key**
 3. Naam: bijv. `GitHub Actions`
 4. Rol: **Admin**
@@ -45,7 +50,7 @@ base64 -i AuthKey_XXXXXXXXXX.p8 | tr -d '\n'
 
 ### 4. GitHub Secrets toevoegen
 
-Ga naar `elios-fox/base` → Settings → Secrets and variables → Actions → New repository secret.
+Ga naar `elios-fox/base` > Settings > Secrets and variables > Actions > New repository secret.
 
 | Secret | Waarde |
 |--------|--------|
@@ -55,6 +60,8 @@ Ga naar `elios-fox/base` → Settings → Secrets and variables → Actions → 
 | `ASC_KEY_ID` | Key ID uit stap 3 |
 | `ASC_ISSUER_ID` | Issuer ID uit stap 3 |
 | `ASC_KEY_CONTENT` | Base64-encoded `.p8` content uit stap 3 |
+| `SUPABASE_URL` | De URL van je Supabase project |
+| `SUPABASE_ANON_KEY` | De anon/public key van je Supabase project |
 
 \* Genereer een GitHub PAT met `repo` scope, en base64-encode het:
 
@@ -74,6 +81,7 @@ De GitHub Action bouwt de app en uploadt naar TestFlight. Na ~15-20 minuten vers
 
 ## Troubleshooting
 
-- **Match kan certificates repo niet clonen**: Controleer `MATCH_GIT_BASIC_AUTHORIZATION` — de PAT moet `repo` scope hebben.
+- **Match kan certificates repo niet clonen**: Controleer `MATCH_GIT_BASIC_AUTHORIZATION` -- de PAT moet `repo` scope hebben.
 - **Code signing error**: Controleer of het certificate niet verlopen is. Run `bundle exec fastlane match nuke appstore` en daarna opnieuw `match appstore`.
 - **Upload mislukt**: Controleer of de API key Admin-rol heeft en of de app in App Store Connect bestaat.
+- **Supabase connectie mislukt**: Controleer of `SUPABASE_URL` en `SUPABASE_ANON_KEY` correct zijn ingesteld als GitHub Secrets.
