@@ -24,6 +24,15 @@ platform :ios do
       api_key: api_key,
     )
 
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      team_id: "8S77A5GHBB",
+      bundle_identifier: "nl.com.club.manager",
+      profile_name: ENV["sigh_nl.com.club.manager_appstore_profile-name"],
+      code_sign_identity: "Apple Distribution",
+    )
+
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
