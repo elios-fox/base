@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../models/team_event.dart';
 import '../../features/attendance/view/event_detail_page.dart';
 import '../../features/attendance/view/join_team_page.dart';
 import '../../features/attendance/view/team_detail_page.dart';
@@ -111,7 +112,7 @@ GoRouter createAppRouter(AuthBloc authBloc) {
                         name: RouteNames.eventDetail,
                         builder: (context, state) => EventDetailPage(
                           eventId: state.pathParameters['eventId']!,
-                          event: state.extra as dynamic,
+                          event: state.extra as TeamEvent?,
                         ),
                       ),
                     ],

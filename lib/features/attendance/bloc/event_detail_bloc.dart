@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/models/attendance.dart';
 import '../../../core/models/team_event.dart';
 import '../../../services/attendance_service.dart';
+import '../../../services/event_service.dart';
 
 // Events
 sealed class EventDetailEvent extends Equatable {
@@ -16,11 +17,12 @@ sealed class EventDetailEvent extends Equatable {
 }
 
 final class EventDetailLoadRequested extends EventDetailEvent {
-  const EventDetailLoadRequested({required this.eventId});
+  const EventDetailLoadRequested({required this.eventId, this.event});
   final String eventId;
+  final TeamEvent? event;
 
   @override
-  List<Object?> get props => [eventId];
+  List<Object?> get props => [eventId, event];
 }
 
 final class EventDetailAttendancesUpdated extends EventDetailEvent {
@@ -91,8 +93,11 @@ final class EventDetailState extends Equatable {
 
 // Bloc
 class EventDetailBloc extends Bloc<EventDetailEvent, EventDetailState> {
-  EventDetailBloc({required AttendanceService attendanceService})
-      : _attendanceService = attendanceService,
+  EventDetailBloc({
+    required AttendanceService attendanceService,
+    required EventService eventService,
+  })  : _attendanceService = attendanceService,
+        _eventService = eventService,
         super(const EventDetailState()) {
     on<EventDetailLoadRequested>(_onLoadRequested);
     on<EventDetailAttendancesUpdated>(_onAttendancesUpdated);
@@ -100,6 +105,7 @@ class EventDetailBloc extends Bloc<EventDetailEvent, EventDetailState> {
   }
 
   final AttendanceService _attendanceService;
+  final EventService _eventService;
   StreamSubscription<List<Attendance>>? _subscription;
 
   Future<void> _onLoadRequested(
@@ -107,6 +113,14 @@ class EventDetailBloc extends Bloc<EventDetailEvent, EventDetailState> {
     Emitter<EventDetailState> emit,
   ) async {
     emit(state.copyWith(status: EventDetailStatus.loading));
+
+    // Use passed event or fetch from service
+    final teamEvent =
+        event.event ?? await _eventService.getEvent(event.eventId);
+    if (teamEvent != null) {
+      emit(state.copyWith(event: teamEvent));
+    }
+
     await _subscription?.cancel();
     _subscription = _attendanceService.getAttendances(event.eventId).listen(
           (attendances) => add(EventDetailAttendancesUpdated(attendances)),

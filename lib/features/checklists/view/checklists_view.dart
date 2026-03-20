@@ -67,7 +67,12 @@ class ChecklistsView extends StatelessWidget {
               const LoadingIndicator(),
             ChecklistsStatus.failure => ErrorView(
                 message: 'Kon checklists niet laden.',
-                onRetry: () {},
+                onRetry: () {
+                  final uid = context.read<AuthBloc>().state.user!.uid;
+                  context
+                      .read<ChecklistsBloc>()
+                      .add(ChecklistsLoadRequested(ownerUid: uid));
+                },
               ),
             ChecklistsStatus.loaded => state.checklists.isEmpty
                 ? const Center(

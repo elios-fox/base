@@ -11,9 +11,7 @@ import '../bloc/event_detail_bloc.dart';
 import '../widgets/attendance_tile.dart';
 
 class EventDetailView extends StatelessWidget {
-  const EventDetailView({super.key, this.event});
-
-  final TeamEvent? event;
+  const EventDetailView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,18 +19,19 @@ class EventDetailView extends StatelessWidget {
     final dateFormat = DateFormat('EEEE d MMMM yyyy', 'nl_NL');
     final timeFormat = DateFormat('HH:mm');
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(event?.title ?? 'Evenement'),
-      ),
-      body: BlocBuilder<EventDetailBloc, EventDetailState>(
-        builder: (context, state) {
+    return BlocBuilder<EventDetailBloc, EventDetailState>(
+      builder: (context, state) {
+        final displayEvent = state.event;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(displayEvent?.title ?? 'Evenement'),
+          ),
+          body: Builder(builder: (context) {
           if (state.status == EventDetailStatus.initial ||
               state.status == EventDetailStatus.loading) {
             return const LoadingIndicator();
           }
-
-          final displayEvent = event;
           final user = context.read<AuthBloc>().state.user!;
           final myAttendance = state.attendances
               .where((a) => a.userUid == user.uid)
@@ -213,8 +212,9 @@ class EventDetailView extends StatelessWidget {
                 ),
             ],
           );
-        },
-      ),
+        }),
+        );
+      },
     );
   }
 }

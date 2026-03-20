@@ -18,7 +18,11 @@ class SupaStorageService implements StorageService {
 
   @override
   Future<String> uploadImage(String path, File file) async {
-    await _supabase.storage.from('uploads').upload(path, file);
+    await _supabase.storage.from('uploads').upload(
+      path,
+      file,
+      fileOptions: const FileOptions(upsert: true),
+    );
     return _supabase.storage.from('uploads').getPublicUrl(path);
   }
 }

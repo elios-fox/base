@@ -166,6 +166,8 @@ class ChecklistCreateBloc
         status: ChecklistCreateStatus.failure,
         errorMessage: 'Opslaan mislukt. Controleer je internetverbinding.',
       ));
+      // Reset zodat gebruiker opnieuw kan proberen
+      emit(state.copyWith(status: ChecklistCreateStatus.initial));
     }
   }
 }

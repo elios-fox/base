@@ -20,7 +20,21 @@ class TeamListView extends StatelessWidget {
         onPressed: () => _showCreateTeamDialog(context),
         child: const Icon(Icons.add),
       ),
-      body: BlocBuilder<TeamListBloc, TeamListState>(
+      body: BlocListener<TeamListBloc, TeamListState>(
+        listenWhen: (previous, current) =>
+            current.errorMessage != null &&
+            current.errorMessage != previous.errorMessage,
+        listener: (context, state) {
+          if (state.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage!),
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
+            );
+          }
+        },
+        child: BlocBuilder<TeamListBloc, TeamListState>(
         builder: (context, state) {
           return switch (state.status) {
             TeamListStatus.initial ||
@@ -77,63 +91,123 @@ class TeamListView extends StatelessWidget {
           };
         },
       ),
+      ),
     );
   }
 
+  static const _sportOptions = [
+    'Voetbal',
+    'Padel',
+    'Tennis',
+    'Squash',
+    'Waterpolo',
+    'Hockey',
+    'Handbal',
+    'Basketbal',
+    'Volleybal',
+    'Rugby',
+    'Atletiek',
+    'Zwemmen',
+    'Boulderen',
+    'Overig',
+  ];
+
   void _showCreateTeamDialog(BuildContext context) {
     final nameController = TextEditingController();
-    final sportController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    String? selectedSport;
     showDialog(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Nieuw team'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Teamnaam',
-                  hintText: 'bijv. Heren 1',
+        return BlocConsumer<TeamListBloc, TeamListState>(
+          listenWhen: (previous, current) =>
+              previous.isCreating && !current.isCreating,
+          listener: (context, state) {
+            if (state.errorMessage == null) {
+              // Create succeeded — close dialog
+              Navigator.of(dialogContext).pop();
+            }
+          },
+          builder: (context, state) {
+            return AlertDialog(
+              title: const Text('Nieuw team'),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: nameController,
+                      autofocus: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Teamnaam',
+                        hintText: 'bijv. Heren 1',
+                      ),
+                      textCapitalization: TextCapitalization.words,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Vul een teamnaam in';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedSport,
+                      decoration: const InputDecoration(
+                        labelText: 'Sport',
+                      ),
+                      items: _sportOptions
+                          .map((sport) => DropdownMenuItem(
+                                value: sport,
+                                child: Text(sport),
+                              ))
+                          .toList(),
+                      onChanged: (value) => selectedSport = value,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Kies een sport';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
                 ),
-                textCapitalization: TextCapitalization.words,
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: sportController,
-                decoration: const InputDecoration(
-                  labelText: 'Sport',
-                  hintText: 'bijv. Voetbal, Padel, Waterpolo',
+              actions: [
+                TextButton(
+                  onPressed: state.isCreating
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(),
+                  child: const Text('Annuleren'),
                 ),
-                textCapitalization: TextCapitalization.words,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Annuleren'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final name = nameController.text.trim();
-                if (name.isNotEmpty) {
-                  final uid = context.read<AuthBloc>().state.user!.uid;
-                  context.read<TeamListBloc>().add(
-                        TeamCreateRequested(
-                          name: name,
-                          ownerUid: uid,
-                          sport: sportController.text.trim(),
-                        ),
-                      );
-                  Navigator.of(dialogContext).pop();
-                }
-              },
-              child: const Text('Aanmaken'),
-            ),
-          ],
+                FilledButton(
+                  onPressed: state.isCreating
+                      ? null
+                      : () {
+                          if (formKey.currentState!.validate()) {
+                            final uid =
+                                context.read<AuthBloc>().state.user!.uid;
+                            context.read<TeamListBloc>().add(
+                                  TeamCreateRequested(
+                                    name: nameController.text.trim(),
+                                    ownerUid: uid,
+                                    sport: selectedSport ?? '',
+                                  ),
+                                );
+                          }
+                        },
+                  child: state.isCreating
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Aanmaken'),
+                ),
+              ],
+            );
+          },
         );
       },
     );

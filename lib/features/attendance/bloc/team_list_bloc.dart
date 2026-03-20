@@ -61,23 +61,31 @@ final class TeamListState extends Equatable {
   const TeamListState({
     this.status = TeamListStatus.initial,
     this.teams = const [],
+    this.errorMessage,
+    this.isCreating = false,
   });
 
   final TeamListStatus status;
   final List<Team> teams;
+  final String? errorMessage;
+  final bool isCreating;
 
   TeamListState copyWith({
     TeamListStatus? status,
     List<Team>? teams,
+    String? errorMessage,
+    bool? isCreating,
   }) {
     return TeamListState(
       status: status ?? this.status,
       teams: teams ?? this.teams,
+      errorMessage: errorMessage,
+      isCreating: isCreating ?? this.isCreating,
     );
   }
 
   @override
-  List<Object?> get props => [status, teams];
+  List<Object?> get props => [status, teams, errorMessage, isCreating];
 }
 
 // Bloc
@@ -119,12 +127,21 @@ class TeamListBloc extends Bloc<TeamListEvent, TeamListState> {
     TeamCreateRequested event,
     Emitter<TeamListState> emit,
   ) async {
-    await _teamService.createTeam(
-      event.name,
-      event.ownerUid,
-      event.sport,
-      clubId: event.clubId,
-    );
+    emit(state.copyWith(isCreating: true, errorMessage: null));
+    try {
+      await _teamService.createTeam(
+        event.name,
+        event.ownerUid,
+        event.sport,
+        clubId: event.clubId,
+      );
+      emit(state.copyWith(isCreating: false));
+    } catch (e) {
+      emit(state.copyWith(
+        isCreating: false,
+        errorMessage: 'Team aanmaken mislukt: $e',
+      ));
+    }
   }
 
   Future<void> _onDeleteRequested(

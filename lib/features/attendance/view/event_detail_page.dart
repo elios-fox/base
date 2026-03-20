@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../services/attendance_service.dart';
+import '../../../services/event_service.dart';
 import '../../../core/models/team_event.dart';
 import '../bloc/event_detail_bloc.dart';
 import 'event_detail_view.dart';
@@ -22,8 +23,9 @@ class EventDetailPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => EventDetailBloc(
         attendanceService: locate<AttendanceService>(),
-      )..add(EventDetailLoadRequested(eventId: eventId)),
-      child: EventDetailView(event: event),
+        eventService: locate<EventService>(),
+      )..add(EventDetailLoadRequested(eventId: eventId, event: event)),
+      child: const EventDetailView(),
     );
   }
 }

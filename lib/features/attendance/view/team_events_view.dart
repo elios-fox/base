@@ -95,6 +95,7 @@ class TeamEventsView extends StatelessWidget {
                 event: event,
                 onTap: () => context.go(
                   '/attendance/$teamId/event/${event.id}',
+                  extra: event,
                 ),
               )),
         ],
@@ -112,6 +113,7 @@ class TeamEventsView extends StatelessWidget {
                 event: event,
                 onTap: () => context.go(
                   '/attendance/$teamId/event/${event.id}',
+                  extra: event,
                 ),
               )),
         ],
@@ -120,6 +122,7 @@ class TeamEventsView extends StatelessWidget {
   }
 
   void _showCreateEventDialog(BuildContext context) {
+    final eventListBloc = context.read<EventListBloc>();
     final titleController = TextEditingController();
     final locationController = TextEditingController();
     var selectedType = EventType.training;
@@ -128,6 +131,7 @@ class TeamEventsView extends StatelessWidget {
 
     showDialog(
       context: context,
+      useRootNavigator: false,
       builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setState) {
@@ -234,12 +238,7 @@ class TeamEventsView extends StatelessWidget {
                         dateTime: dateTime,
                         location: locationController.text.trim(),
                       );
-                      // Access the bloc from the outer context
-                      final bloc = BlocProvider.of<EventListBloc>(
-                        dialogContext,
-                        listen: false,
-                      );
-                      bloc.add(EventCreateRequested(event: event));
+                      eventListBloc.add(EventCreateRequested(event: event));
                       Navigator.of(dialogContext).pop();
                     }
                   },
