@@ -153,7 +153,7 @@ class _ContributionCreateViewState extends State<_ContributionCreateView> {
 
               // Seizoen
               DropdownButtonFormField<int>(
-                value: _seizoen,
+                initialValue: _seizoen,
                 decoration: InputDecoration(
                   labelText: 'Seizoen',
                   border: OutlineInputBorder(

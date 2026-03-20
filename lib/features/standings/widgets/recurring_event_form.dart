@@ -80,7 +80,7 @@ class _RecurringEventFormState extends State<RecurringEventForm> {
 
           // Frequentie
           DropdownButtonFormField<RecurringFrequency>(
-            value: _frequency,
+            initialValue: _frequency,
             decoration: const InputDecoration(
               labelText: 'Frequentie',
               border: OutlineInputBorder(),
@@ -106,7 +106,7 @@ class _RecurringEventFormState extends State<RecurringEventForm> {
 
           // Dag van de week
           DropdownButtonFormField<int>(
-            value: _dayOfWeek,
+            initialValue: _dayOfWeek,
             decoration: const InputDecoration(
               labelText: 'Dag van de week',
               border: OutlineInputBorder(),
