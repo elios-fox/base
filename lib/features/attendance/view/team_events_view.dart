@@ -28,8 +28,19 @@ class TeamEventsView extends StatelessWidget {
         onPressed: () => _showCreateEventDialog(context),
         child: const Icon(Icons.add),
       ),
-      body: BlocBuilder<EventListBloc, EventListState>(
-        builder: (context, state) {
+      body: BlocListener<EventListBloc, EventListState>(
+        listenWhen: (prev, curr) =>
+            prev.status != curr.status &&
+            curr.status == EventListStatus.failure,
+        listener: (context, state) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Evenement aanmaken mislukt. Probeer opnieuw.'),
+            ),
+          );
+        },
+        child: BlocBuilder<EventListBloc, EventListState>(
+          builder: (context, state) {
           return switch (state.status) {
             EventListStatus.initial ||
             EventListStatus.loading =>
@@ -68,7 +79,8 @@ class TeamEventsView extends StatelessWidget {
                   )
                 : _buildEventList(context, state.events),
           };
-        },
+          },
+        ),
       ),
     );
   }
@@ -134,7 +146,7 @@ class TeamEventsView extends StatelessWidget {
       useRootNavigator: false,
       builder: (dialogContext) {
         return StatefulBuilder(
-          builder: (context, setState) {
+          builder: (sbContext, setState) {
             final dateFormat = DateFormat('EEE d MMM yyyy', 'nl_NL');
             return AlertDialog(
               title: const Text('Nieuw evenement'),
@@ -186,7 +198,7 @@ class TeamEventsView extends StatelessWidget {
                       title: Text(dateFormat.format(selectedDate)),
                       onTap: () async {
                         final date = await showDatePicker(
-                          context: context,
+                          context: sbContext,
                           initialDate: selectedDate,
                           firstDate: DateTime.now(),
                           lastDate:
@@ -200,10 +212,10 @@ class TeamEventsView extends StatelessWidget {
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.access_time),
-                      title: Text(selectedTime.format(context)),
+                      title: Text(selectedTime.format(sbContext)),
                       onTap: () async {
                         final time = await showTimePicker(
-                          context: context,
+                          context: sbContext,
                           initialTime: selectedTime,
                         );
                         if (time != null) {
@@ -231,7 +243,7 @@ class TeamEventsView extends StatelessWidget {
                         selectedTime.minute,
                       );
                       final event = TeamEvent(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        id: '',
                         teamId: teamId,
                         title: title,
                         type: selectedType,

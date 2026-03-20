@@ -67,6 +67,22 @@ void main() {
       },
     );
 
+    blocTest<EventListBloc, EventListState>(
+      'emits [failure, loaded] when createEvent throws — recovers for retry',
+      build: () {
+        when(() => mockEventService.createEvent(any()))
+            .thenThrow(Exception('Supabase error'));
+        return EventListBloc(eventService: mockEventService);
+      },
+      seed: () => EventListState(status: EventListStatus.loaded, events: [fakeEvent()]),
+      act: (bloc) =>
+          bloc.add(EventCreateRequested(event: fakeEvent())),
+      expect: () => [
+        EventListState(status: EventListStatus.failure, events: [fakeEvent()]),
+        EventListState(status: EventListStatus.loaded, events: [fakeEvent()]),
+      ],
+    );
+
     test('initial state is correct', () {
       final bloc = EventListBloc(eventService: mockEventService);
       expect(bloc.state.status, EventListStatus.initial);

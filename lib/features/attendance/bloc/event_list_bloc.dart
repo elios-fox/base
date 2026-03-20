@@ -111,7 +111,13 @@ class EventListBloc extends Bloc<EventListEvent, EventListState> {
     EventCreateRequested event,
     Emitter<EventListState> emit,
   ) async {
-    await _eventService.createEvent(event.event);
+    try {
+      await _eventService.createEvent(event.event);
+    } catch (e) {
+      emit(state.copyWith(status: EventListStatus.failure));
+      // Herstel naar loaded zodat de lijst zichtbaar blijft
+      emit(state.copyWith(status: EventListStatus.loaded));
+    }
   }
 
   Future<void> _onDeleteRequested(
