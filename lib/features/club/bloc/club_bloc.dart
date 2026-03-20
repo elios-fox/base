@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,12 +14,12 @@ class ClubBloc extends Bloc<ClubEvent, ClubState> {
       : _clubService = clubService,
         _userId = userId,
         super(const ClubState()) {
-    on<ClubLoadRequested>(_onLoadRequested);
+    on<ClubLoadRequested>(_onLoadRequested, transformer: restartable());
     on<ClubDetailLoadRequested>(_onDetailLoadRequested);
     on<ClubCreateRequested>(_onCreateRequested);
     on<ClubJoinRequested>(_onJoinRequested);
     on<ClubSelected>(_onSelected);
-    on<ClubMembersLoadRequested>(_onMembersLoadRequested);
+    on<ClubMembersLoadRequested>(_onMembersLoadRequested, transformer: restartable());
     on<ClubMemberRoleChanged>(_onMemberRoleChanged);
     on<ClubMemberRemoved>(_onMemberRemoved);
   }

@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -12,10 +13,10 @@ class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
   FinanceBloc({required FinanceService financeService})
       : _financeService = financeService,
         super(const FinanceState()) {
-    on<FinanceLoadRequested>(_onLoadRequested);
+    on<FinanceLoadRequested>(_onLoadRequested, transformer: restartable());
     on<ContributionCreateRequested>(_onContributionCreateRequested);
     on<PaymentStatusChanged>(_onPaymentStatusChanged);
-    on<PaymentsLoadRequested>(_onPaymentsLoadRequested);
+    on<PaymentsLoadRequested>(_onPaymentsLoadRequested, transformer: restartable());
   }
 
   final FinanceService _financeService;

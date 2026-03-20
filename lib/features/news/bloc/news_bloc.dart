@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,7 +12,7 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
   NewsBloc({required NewsService newsService})
       : _newsService = newsService,
         super(const NewsState()) {
-    on<NewsLoadRequested>(_onLoadRequested);
+    on<NewsLoadRequested>(_onLoadRequested, transformer: restartable());
     on<NewsCreateRequested>(_onCreateRequested);
     on<NewsDeleteRequested>(_onDeleteRequested);
   }

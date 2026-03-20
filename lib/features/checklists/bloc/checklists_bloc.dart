@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -11,7 +12,7 @@ class ChecklistsBloc extends Bloc<ChecklistsEvent, ChecklistsState> {
   ChecklistsBloc({required ChecklistService checklistService})
       : _checklistService = checklistService,
         super(const ChecklistsState()) {
-    on<ChecklistsLoadRequested>(_onLoadRequested);
+    on<ChecklistsLoadRequested>(_onLoadRequested, transformer: restartable());
     on<ChecklistsChecklistDeleted>(_onChecklistDeleted);
   }
 

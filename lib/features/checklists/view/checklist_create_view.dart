@@ -29,7 +29,7 @@ class _ChecklistCreateViewState extends State<ChecklistCreateView> {
       listenWhen: (prev, curr) => prev.status != curr.status,
       listener: (context, state) {
         if (state.status == ChecklistCreateStatus.success) {
-          context.go('/checklists');
+          context.pop();
         } else if (state.status == ChecklistCreateStatus.failure &&
             state.errorMessage.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(

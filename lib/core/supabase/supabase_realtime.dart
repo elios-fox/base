@@ -33,6 +33,13 @@ class SupabaseRealtime {
           event: PostgresChangeEvent.all,
           schema: 'public',
           table: table,
+          filter: column != null && value != null
+              ? PostgresChangeFilter(
+                  type: PostgresChangeFilterType.eq,
+                  column: column,
+                  value: value,
+                )
+              : null,
           callback: (payload) {
             // Re-fetch on any change
             _fetchAndEmit(table, column, value, orderBy, ascending, controller);

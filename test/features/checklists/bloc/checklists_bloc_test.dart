@@ -72,6 +72,58 @@ void main() {
     );
 
     blocTest<ChecklistsBloc, ChecklistsState>(
+      'reloads checklists when ChecklistsLoadRequested is dispatched again',
+      build: () {
+        var callCount = 0;
+        when(() => mockChecklistService.getChecklists('user-1'))
+            .thenAnswer((_) {
+          callCount++;
+          if (callCount == 1) {
+            return Stream.value(checklists);
+          }
+          return Stream.value([
+            ...checklists,
+            Checklist(
+              id: '3',
+              title: 'Checklist 3',
+              ownerUid: 'user-1',
+              createdAt: DateTime(2026),
+            ),
+          ]);
+        });
+        return buildBloc();
+      },
+      act: (bloc) async {
+        bloc.add(const ChecklistsLoadRequested(ownerUid: 'user-1'));
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(const ChecklistsLoadRequested(ownerUid: 'user-1'));
+      },
+      expect: () => [
+        const ChecklistsState(status: ChecklistsStatus.loading),
+        ChecklistsState(
+          status: ChecklistsStatus.loaded,
+          checklists: checklists,
+        ),
+        ChecklistsState(
+          status: ChecklistsStatus.loading,
+          checklists: checklists,
+        ),
+        ChecklistsState(
+          status: ChecklistsStatus.loaded,
+          checklists: [
+            ...checklists,
+            Checklist(
+              id: '3',
+              title: 'Checklist 3',
+              ownerUid: 'user-1',
+              createdAt: DateTime(2026),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    blocTest<ChecklistsBloc, ChecklistsState>(
       'calls deleteChecklist on ChecklistDeleted',
       build: () {
         when(() => mockChecklistService.deleteChecklist('1'))

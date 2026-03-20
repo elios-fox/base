@@ -56,7 +56,15 @@ class ChecklistsView extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/checklists/create'),
+        onPressed: () async {
+          await context.push('/checklists/create');
+          if (context.mounted) {
+            final uid = context.read<AuthBloc>().state.user!.uid;
+            context
+                .read<ChecklistsBloc>()
+                .add(ChecklistsLoadRequested(ownerUid: uid));
+          }
+        },
         child: const Icon(Icons.add),
       ),
       body: BlocBuilder<ChecklistsBloc, ChecklistsState>(

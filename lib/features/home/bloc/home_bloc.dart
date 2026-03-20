@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -20,7 +21,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         _userId = userId,
         _displayName = displayName,
         super(const HomeState()) {
-    on<HomeStarted>(_onStarted);
+    on<HomeStarted>(_onStarted, transformer: restartable());
   }
 
   final TeamService _teamService;
