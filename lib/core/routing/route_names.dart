@@ -13,4 +13,11 @@ abstract final class RouteNames {
   static const eventDetail = 'eventDetail';
   static const joinTeam = 'joinTeam';
   static const profile = 'profile';
+  static const clubs = 'clubs';
+  static const clubDetail = 'clubDetail';
+  static const news = 'news';
+  static const newsCreate = 'newsCreate';
+  static const finance = 'finance';
+  static const contributionCreate = 'contributionCreate';
+  static const standings = 'standings';
 }

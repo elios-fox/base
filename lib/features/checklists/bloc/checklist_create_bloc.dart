@@ -17,6 +17,7 @@ class ChecklistCreateBloc
     required ChecklistService checklistService,
     required StorageService storageService,
     required String ownerUid,
+    this.teamId,
   })  : _checklistService = checklistService,
         _storageService = storageService,
         _ownerUid = ownerUid,
@@ -34,6 +35,7 @@ class ChecklistCreateBloc
   final ChecklistService _checklistService;
   final StorageService _storageService;
   final String _ownerUid;
+  final String? teamId;
   String? _existingId;
 
   Future<void> _onStarted(
@@ -144,6 +146,7 @@ class ChecklistCreateBloc
         await _checklistService.createChecklist(
           title: state.title.trim(),
           ownerUid: _ownerUid,
+          teamId: teamId,
           items: state.items,
         );
       } else {
@@ -152,6 +155,7 @@ class ChecklistCreateBloc
           title: state.title.trim(),
           ownerUid: _ownerUid,
           createdAt: DateTime.now(),
+          teamId: teamId,
           items: state.items,
         );
         await _checklistService.updateChecklist(checklist);

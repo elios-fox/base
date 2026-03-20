@@ -12,9 +12,16 @@ import '../../features/checklists/view/checklists_page.dart';
 import '../../features/checklists/view/checklist_create_page.dart';
 import '../../features/checklists/view/checklist_detail_page.dart';
 import '../../features/checklists/view/checklist_wizard_page.dart';
+import '../../features/club/view/club_detail_page.dart';
+import '../../features/club/view/club_list_page.dart';
+import '../../features/finance/view/contribution_create_page.dart';
+import '../../features/finance/view/finance_page.dart';
 import '../../features/home/view/home_page.dart';
+import '../../features/news/view/news_create_page.dart';
+import '../../features/news/view/news_page.dart';
 import '../../features/profile/view/profile_page.dart';
 import '../../features/shell/view/shell_page.dart';
+import '../../features/standings/view/standings_page.dart';
 import '../auth/auth_bloc.dart';
 import 'go_router_refresh_stream.dart';
 import 'route_names.dart';
@@ -137,7 +144,9 @@ GoRouter createAppRouter(AuthBloc authBloc) {
           GoRoute(
             path: 'create',
             name: RouteNames.checklistCreate,
-            builder: (context, state) => const ChecklistCreatePage(),
+            builder: (context, state) => ChecklistCreatePage(
+              teamId: state.uri.queryParameters['teamId'],
+            ),
           ),
           GoRoute(
             path: 'edit/:id',
@@ -163,6 +172,81 @@ GoRouter createAppRouter(AuthBloc authBloc) {
             ],
           ),
         ],
+      ),
+
+      // Clubs
+      GoRoute(
+        path: '/clubs',
+        name: RouteNames.clubs,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ClubListPage(),
+        routes: [
+          GoRoute(
+            path: ':clubId',
+            name: RouteNames.clubDetail,
+            builder: (context, state) => ClubDetailPage(
+              clubId: state.pathParameters['clubId']!,
+            ),
+          ),
+        ],
+      ),
+
+      // News
+      GoRoute(
+        path: '/news',
+        name: RouteNames.news,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final clubId = state.uri.queryParameters['clubId'] ?? '';
+          final teamIds =
+              state.uri.queryParameters['teamIds']?.split(',') ?? [];
+          final canPost =
+              state.uri.queryParameters['canPost'] == 'true';
+          return NewsPage(
+            clubId: clubId,
+            teamIds: teamIds,
+            canPost: canPost,
+          );
+        },
+        routes: [
+          GoRoute(
+            path: 'create',
+            name: RouteNames.newsCreate,
+            builder: (context, state) => NewsCreatePage(
+              clubId: state.uri.queryParameters['clubId'] ?? '',
+              teamId: state.uri.queryParameters['teamId'],
+            ),
+          ),
+        ],
+      ),
+
+      // Finance
+      GoRoute(
+        path: '/finance',
+        name: RouteNames.finance,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => FinancePage(
+          teamId: state.uri.queryParameters['teamId'] ?? '',
+        ),
+        routes: [
+          GoRoute(
+            path: 'create',
+            name: RouteNames.contributionCreate,
+            builder: (context, state) => ContributionCreatePage(
+              teamId: state.uri.queryParameters['teamId'] ?? '',
+            ),
+          ),
+        ],
+      ),
+
+      // Standings
+      GoRoute(
+        path: '/standings',
+        name: RouteNames.standings,
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => StandingsPage(
+          teamId: state.uri.queryParameters['teamId'] ?? '',
+        ),
       ),
     ],
   );

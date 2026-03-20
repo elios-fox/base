@@ -81,20 +81,35 @@ class TeamListView extends StatelessWidget {
   }
 
   void _showCreateTeamDialog(BuildContext context) {
-    final controller = TextEditingController();
+    final nameController = TextEditingController();
+    final sportController = TextEditingController();
     showDialog(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Nieuw team'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Teamnaam',
-              hintText: 'bijv. Heren 1',
-            ),
-            textCapitalization: TextCapitalization.words,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'Teamnaam',
+                  hintText: 'bijv. Heren 1',
+                ),
+                textCapitalization: TextCapitalization.words,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: sportController,
+                decoration: const InputDecoration(
+                  labelText: 'Sport',
+                  hintText: 'bijv. Voetbal, Padel, Waterpolo',
+                ),
+                textCapitalization: TextCapitalization.words,
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -103,11 +118,15 @@ class TeamListView extends StatelessWidget {
             ),
             FilledButton(
               onPressed: () {
-                final name = controller.text.trim();
+                final name = nameController.text.trim();
                 if (name.isNotEmpty) {
                   final uid = context.read<AuthBloc>().state.user!.uid;
                   context.read<TeamListBloc>().add(
-                        TeamCreateRequested(name: name, ownerUid: uid),
+                        TeamCreateRequested(
+                          name: name,
+                          ownerUid: uid,
+                          sport: sportController.text.trim(),
+                        ),
                       );
                   Navigator.of(dialogContext).pop();
                 }

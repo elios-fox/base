@@ -31,12 +31,19 @@ final class TeamListUpdated extends TeamListEvent {
 }
 
 final class TeamCreateRequested extends TeamListEvent {
-  const TeamCreateRequested({required this.name, required this.ownerUid});
+  const TeamCreateRequested({
+    required this.name,
+    required this.ownerUid,
+    this.sport = '',
+    this.clubId,
+  });
   final String name;
   final String ownerUid;
+  final String sport;
+  final String? clubId;
 
   @override
-  List<Object?> get props => [name, ownerUid];
+  List<Object?> get props => [name, ownerUid, sport, clubId];
 }
 
 final class TeamDeleteRequested extends TeamListEvent {
@@ -112,7 +119,12 @@ class TeamListBloc extends Bloc<TeamListEvent, TeamListState> {
     TeamCreateRequested event,
     Emitter<TeamListState> emit,
   ) async {
-    await _teamService.createTeam(event.name, event.ownerUid, '');
+    await _teamService.createTeam(
+      event.name,
+      event.ownerUid,
+      event.sport,
+      clubId: event.clubId,
+    );
   }
 
   Future<void> _onDeleteRequested(

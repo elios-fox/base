@@ -8,6 +8,7 @@ class Checklist extends Equatable {
     required this.title,
     required this.ownerUid,
     required this.createdAt,
+    this.teamId,
     this.items = const [],
   });
 
@@ -15,6 +16,7 @@ class Checklist extends Equatable {
   final String title;
   final String ownerUid;
   final DateTime createdAt;
+  final String? teamId;
   final List<ChecklistItem> items;
 
   Checklist copyWith({
@@ -22,6 +24,7 @@ class Checklist extends Equatable {
     String? title,
     String? ownerUid,
     DateTime? createdAt,
+    String? teamId,
     List<ChecklistItem>? items,
   }) {
     return Checklist(
@@ -29,10 +32,11 @@ class Checklist extends Equatable {
       title: title ?? this.title,
       ownerUid: ownerUid ?? this.ownerUid,
       createdAt: createdAt ?? this.createdAt,
+      teamId: teamId ?? this.teamId,
       items: items ?? this.items,
     );
   }
 
   @override
-  List<Object?> get props => [id, title, ownerUid, createdAt, items];
+  List<Object?> get props => [id, title, ownerUid, createdAt, teamId, items];
 }

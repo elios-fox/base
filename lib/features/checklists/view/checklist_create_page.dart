@@ -9,9 +9,10 @@ import '../bloc/checklist_create_bloc.dart';
 import 'checklist_create_view.dart';
 
 class ChecklistCreatePage extends StatelessWidget {
-  const ChecklistCreatePage({super.key, this.checklistId});
+  const ChecklistCreatePage({super.key, this.checklistId, this.teamId});
 
   final String? checklistId;
+  final String? teamId;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +22,7 @@ class ChecklistCreatePage extends StatelessWidget {
         checklistService: locate<ChecklistService>(),
         storageService: locate<StorageService>(),
         ownerUid: uid,
+        teamId: teamId,
       )..add(ChecklistCreateStarted(existingId: checklistId)),
       child: const ChecklistCreateView(),
     );

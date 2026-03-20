@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'recurring_pattern.dart';
+
 enum EventType { training, wedstrijd }
 
 class TeamEvent extends Equatable {
@@ -11,6 +13,8 @@ class TeamEvent extends Equatable {
     required this.dateTime,
     this.location = '',
     this.notes = '',
+    this.recurring = false,
+    this.recurringPattern,
   });
 
   final String id;
@@ -20,6 +24,10 @@ class TeamEvent extends Equatable {
   final DateTime dateTime;
   final String location;
   final String notes;
+  final bool recurring;
+  final RecurringPattern? recurringPattern;
+
+  bool get isWedstrijd => type == EventType.wedstrijd;
 
   TeamEvent copyWith({
     String? id,
@@ -29,6 +37,8 @@ class TeamEvent extends Equatable {
     DateTime? dateTime,
     String? location,
     String? notes,
+    bool? recurring,
+    RecurringPattern? recurringPattern,
   }) {
     return TeamEvent(
       id: id ?? this.id,
@@ -38,10 +48,12 @@ class TeamEvent extends Equatable {
       dateTime: dateTime ?? this.dateTime,
       location: location ?? this.location,
       notes: notes ?? this.notes,
+      recurring: recurring ?? this.recurring,
+      recurringPattern: recurringPattern ?? this.recurringPattern,
     );
   }
 
   @override
   List<Object?> get props =>
-      [id, teamId, title, type, dateTime, location, notes];
+      [id, teamId, title, type, dateTime, location, notes, recurring, recurringPattern];
 }

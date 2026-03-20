@@ -1,7 +1,11 @@
 import '../../services/attendance_service.dart';
+import '../../services/club_service.dart';
 import '../../services/event_service.dart';
+import '../../services/finance_service.dart';
+import '../../services/news_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/checklist_service.dart';
+import '../../services/standings_service.dart';
 import '../../services/team_service.dart';
 import '../auth/auth_repository.dart';
 import '../supabase/supabase_client.dart';
@@ -23,6 +27,10 @@ void setupDependencies() {
   _registry[NotificationService] = SupaNotificationService();
   _registry[ChecklistService] = SupaChecklistService();
   _registry[StorageService] = SupaStorageService();
+  _registry[ClubService] = SupaClubService();
+  _registry[NewsService] = SupaNewsService();
+  _registry[FinanceService] = SupaFinanceService();
+  _registry[StandingsService] = StandingsService();
 }
 
 T locate<T extends Object>() {

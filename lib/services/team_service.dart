@@ -8,7 +8,8 @@ import '../core/supabase/supabase_client.dart';
 abstract class TeamService {
   Stream<List<Team>> getTeams(String userId);
   Future<Team?> getTeam(String id);
-  Future<Team> createTeam(String name, String ownerUid, String sport);
+  Future<Team> createTeam(String name, String ownerUid, String sport,
+      {String? clubId});
   Future<void> updateTeam(Team team);
   Future<void> updateTeamPhoto(String teamId, String photoUrl, String dominantColor);
   Future<void> deleteTeam(String id);
@@ -81,13 +82,15 @@ class SupaTeamService implements TeamService {
   }
 
   @override
-  Future<Team> createTeam(String name, String ownerUid, String sport) async {
+  Future<Team> createTeam(String name, String ownerUid, String sport,
+      {String? clubId}) async {
     final data = await _supabase.from('teams').insert({
       'name': name,
       'owner_uid': ownerUid,
       'sport': sport,
       'season_year': DateTime.now().year,
       'member_uids': [ownerUid],
+      if (clubId != null) 'club_id': clubId,
     }).select().single();
     return _teamFromMap(data);
   }
@@ -149,9 +152,13 @@ class SupaTeamService implements TeamService {
       ownerUid: map['owner_uid'] as String,
       createdAt:
           DateTime.tryParse(map['created_at'] as String? ?? '') ?? DateTime.now(),
+      clubId: map['club_id'] as String?,
       memberUids: List<String>.from(map['member_uids'] as List? ?? []),
       photoUrl: map['photo_url'] as String?,
       dominantColor: map['dominant_color'] as String?,
+      sport: map['sport'] as String?,
+      seasonYear: map['season_year'] as int?,
+      inviteCode: map['invite_code'] as String?,
     );
   }
 }

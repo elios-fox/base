@@ -9,15 +9,20 @@ import '../../../helpers/mocks.dart';
 
 void main() {
   late MockAuthBloc mockAuthBloc;
+  late MockAuthRepository mockAuthRepository;
 
   setUp(() {
     mockAuthBloc = MockAuthBloc();
+    mockAuthRepository = MockAuthRepository();
   });
 
   group('ProfileBloc', () {
     test('initial state is correct', () {
       when(() => mockAuthBloc.state).thenReturn(const AuthState.unknown());
-      final bloc = ProfileBloc(authBloc: mockAuthBloc);
+      final bloc = ProfileBloc(
+        authBloc: mockAuthBloc,
+        authRepository: mockAuthRepository,
+      );
       expect(bloc.state, const ProfileState());
       expect(bloc.state.status, ProfileStatus.initial);
       expect(bloc.state.displayName, '');
@@ -38,7 +43,10 @@ void main() {
             ),
           ),
         );
-        return ProfileBloc(authBloc: mockAuthBloc);
+        return ProfileBloc(
+          authBloc: mockAuthBloc,
+          authRepository: mockAuthRepository,
+        );
       },
       act: (bloc) => bloc.add(const ProfileLoadRequested()),
       expect: () => [
@@ -59,7 +67,10 @@ void main() {
             AuthUser(uid: 'user-1', email: 'jan@example.com'),
           ),
         );
-        return ProfileBloc(authBloc: mockAuthBloc);
+        return ProfileBloc(
+          authBloc: mockAuthBloc,
+          authRepository: mockAuthRepository,
+        );
       },
       act: (bloc) => bloc.add(const ProfileLoadRequested()),
       expect: () => [
@@ -76,10 +87,46 @@ void main() {
       build: () {
         when(() => mockAuthBloc.state)
             .thenReturn(const AuthState.unauthenticated());
-        return ProfileBloc(authBloc: mockAuthBloc);
+        return ProfileBloc(
+          authBloc: mockAuthBloc,
+          authRepository: mockAuthRepository,
+        );
       },
       act: (bloc) => bloc.add(const ProfileLoadRequested()),
       expect: () => <ProfileState>[],
+    );
+
+    blocTest<ProfileBloc, ProfileState>(
+      'emits success when name is changed',
+      build: () {
+        when(() => mockAuthBloc.state).thenReturn(const AuthState.unknown());
+        when(() => mockAuthRepository.updateDisplayName(any()))
+            .thenAnswer((_) async {});
+        return ProfileBloc(
+          authBloc: mockAuthBloc,
+          authRepository: mockAuthRepository,
+        );
+      },
+      act: (bloc) => bloc.add(const ProfileNameChanged(name: 'Nieuwe Naam')),
+      expect: () => [
+        isA<ProfileState>().having(
+          (s) => s.updateStatus,
+          'updateStatus',
+          ProfileUpdateStatus.submitting,
+        ),
+        isA<ProfileState>()
+            .having(
+              (s) => s.updateStatus,
+              'updateStatus',
+              ProfileUpdateStatus.success,
+            )
+            .having((s) => s.displayName, 'displayName', 'Nieuwe Naam'),
+        isA<ProfileState>().having(
+          (s) => s.updateStatus,
+          'updateStatus',
+          ProfileUpdateStatus.initial,
+        ),
+      ],
     );
   });
 }

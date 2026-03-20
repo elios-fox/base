@@ -50,6 +50,9 @@ abstract class AuthRepository {
     String password, {
     String? name,
   });
+  Future<void> updateDisplayName(String name);
+  Future<void> updatePassword(String newPassword);
+  Future<void> updateProfilePhoto(String photoUrl);
   Future<void> signOut();
 }
 
@@ -166,6 +169,45 @@ class SupabaseAuthRepository implements AuthRepository {
       throw AuthError(_mapAuthError(e.message));
     } catch (e) {
       throw AuthError('Registratie is mislukt. Probeer het opnieuw.');
+    }
+  }
+
+  @override
+  Future<void> updateDisplayName(String name) async {
+    try {
+      await _supabase.auth.updateUser(
+        UserAttributes(data: {'name': name}),
+      );
+    } on AuthException catch (e) {
+      throw AuthError(_mapAuthError(e.message));
+    } catch (e) {
+      throw AuthError('Naam wijzigen is mislukt. Probeer het opnieuw.');
+    }
+  }
+
+  @override
+  Future<void> updateProfilePhoto(String photoUrl) async {
+    try {
+      await _supabase.auth.updateUser(
+        UserAttributes(data: {'avatar_url': photoUrl}),
+      );
+    } on AuthException catch (e) {
+      throw AuthError(_mapAuthError(e.message));
+    } catch (e) {
+      throw AuthError('Profielfoto wijzigen is mislukt. Probeer het opnieuw.');
+    }
+  }
+
+  @override
+  Future<void> updatePassword(String newPassword) async {
+    try {
+      await _supabase.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+    } on AuthException catch (e) {
+      throw AuthError(_mapAuthError(e.message));
+    } catch (e) {
+      throw AuthError('Wachtwoord wijzigen is mislukt. Probeer het opnieuw.');
     }
   }
 
