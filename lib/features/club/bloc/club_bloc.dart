@@ -37,7 +37,7 @@ class ClubBloc extends Bloc<ClubEvent, ClubState> {
         status: ClubStatus.loaded,
         clubs: clubs,
       ),
-      onError: (_, __) => state.copyWith(status: ClubStatus.failure),
+      onError: (_, _) => state.copyWith(status: ClubStatus.failure),
     );
   }
 
@@ -105,7 +105,7 @@ class ClubBloc extends Bloc<ClubEvent, ClubState> {
           myMembership: myMembership,
         );
       },
-      onError: (_, __) => state,
+      onError: (_, _) => state,
     );
   }
 

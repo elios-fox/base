@@ -54,7 +54,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           teams: teams,
         );
       },
-      onError: (_, __) => state.copyWith(status: HomeStatus.failure),
+      onError: (_, _) => state.copyWith(status: HomeStatus.failure),
     );
   }
 

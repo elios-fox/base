@@ -90,6 +90,7 @@ class SupaTeamService implements TeamService {
       'sport': sport,
       'season_year': DateTime.now().year,
       'member_uids': [ownerUid],
+      // ignore: use_null_aware_elements
       if (clubId != null) 'club_id': clubId,
     }).select().single();
     return _teamFromMap(data);

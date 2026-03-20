@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1062835726909",
+    "project_id": "base-e5569",
+    "storage_bucket": "base-e5569.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1062835726909:android:684ffa16f69c2ee7279854",
+        "android_client_info": {
+          "package_name": "com.tuitjer.base"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUk5iRNerW3115zuW5TIYsMkSG20bLx7M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

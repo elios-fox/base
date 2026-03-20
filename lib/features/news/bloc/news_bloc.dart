@@ -29,7 +29,7 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
         status: NewsStatus.loaded,
         posts: posts,
       ),
-      onError: (_, __) => state.copyWith(status: NewsStatus.failure),
+      onError: (_, _) => state.copyWith(status: NewsStatus.failure),
     );
   }
 
