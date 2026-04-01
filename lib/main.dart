@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app.dart';
+import 'core/config/app_config.dart';
 import 'core/di/injection.dart';
-import 'core/supabase/supabase_client.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initSupabase();
+
+  await Supabase.initialize(
+    url: AppConfig.supabaseUrl,
+    anonKey: AppConfig.supabaseAnonKey,
+  );
+
   setupDependencies();
-  runApp(const App());
+
+  runApp(const ClubHubApp());
 }

@@ -1,29 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../auth/auth_bloc.dart';
 import '../models/team_event.dart';
-import '../../features/attendance/view/event_detail_page.dart';
-import '../../features/attendance/view/join_team_page.dart';
-import '../../features/attendance/view/team_detail_page.dart';
-import '../../features/attendance/view/team_events_page.dart';
-import '../../features/attendance/view/team_list_page.dart';
 import '../../features/auth/view/login_page.dart';
 import '../../features/auth/view/sign_up_page.dart';
-import '../../features/checklists/view/checklists_page.dart';
-import '../../features/checklists/view/checklist_create_page.dart';
-import '../../features/checklists/view/checklist_detail_page.dart';
-import '../../features/checklists/view/checklist_wizard_page.dart';
-import '../../features/club/view/club_detail_page.dart';
-import '../../features/club/view/club_list_page.dart';
-import '../../features/finance/view/contribution_create_page.dart';
-import '../../features/finance/view/finance_page.dart';
+import '../../features/auth/view/forgot_password_page.dart';
 import '../../features/home/view/home_page.dart';
-import '../../features/news/view/news_create_page.dart';
-import '../../features/news/view/news_page.dart';
+import '../../features/team/view/team_list_page.dart';
+import '../../features/team/view/team_create_page.dart';
+import '../../features/team/view/team_detail_page.dart';
+import '../../features/team/view/team_join_page.dart';
+import '../../features/team/view/team_invite_page.dart';
+import '../../features/event/view/event_create_page.dart';
+import '../../features/event/view/event_detail_page.dart';
 import '../../features/profile/view/profile_page.dart';
+import '../../features/profile/view/password_page.dart';
+import '../../features/profile/view/notifications_page.dart';
 import '../../features/shell/view/shell_page.dart';
-import '../../features/standings/view/standings_page.dart';
-import '../auth/auth_bloc.dart';
 import 'go_router_refresh_stream.dart';
 import 'route_names.dart';
 
@@ -35,220 +29,44 @@ GoRouter createAppRouter(AuthBloc authBloc) {
     initialLocation: '/',
     refreshListenable: GoRouterRefreshStream(authBloc.stream),
     redirect: (context, state) {
-      final isAuthenticated =
-          authBloc.state.status == AuthStatus.authenticated;
-      final isOnLogin = state.matchedLocation == '/login' ||
-          state.matchedLocation == '/sign-up';
-
+      final isAuthenticated = authBloc.state.status == AuthStatus.authenticated;
+      final isOnAuth = state.matchedLocation == '/login' ||
+          state.matchedLocation == '/sign-up' ||
+          state.matchedLocation == '/forgot-password';
       if (authBloc.state.status == AuthStatus.unknown) return null;
-
-      if (!isAuthenticated && !isOnLogin) return '/login';
-      if (isAuthenticated && isOnLogin) return '/';
-
+      if (!isAuthenticated && !isOnAuth) return '/login';
+      if (isAuthenticated && isOnAuth) return '/';
       return null;
     },
     routes: [
-      // Auth routes (outside shell)
-      GoRoute(
-        path: '/login',
-        name: RouteNames.login,
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const LoginPage(),
-      ),
-      GoRoute(
-        path: '/sign-up',
-        name: RouteNames.signUp,
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const SignUpPage(),
-      ),
-
-      // Main app with bottom navigation
+      GoRoute(path: '/login', name: RouteNames.login, parentNavigatorKey: _rootNavigatorKey, builder: (context, state) => const LoginPage()),
+      GoRoute(path: '/sign-up', name: RouteNames.signUp, parentNavigatorKey: _rootNavigatorKey, builder: (context, state) => const SignUpPage()),
+      GoRoute(path: '/forgot-password', name: RouteNames.forgotPassword, parentNavigatorKey: _rootNavigatorKey, builder: (context, state) => const ForgotPasswordPage()),
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) =>
-            ShellPage(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) => ShellPage(navigationShell: navigationShell),
         branches: [
-          // Tab 1: Home
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/',
-                name: RouteNames.home,
-                builder: (context, state) => const HomePage(),
-              ),
-            ],
-          ),
-
-          // Tab 2: Teams / Aanwezigheid
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/attendance',
-                name: RouteNames.attendance,
-                builder: (context, state) => const TeamListPage(),
-                routes: [
-                  GoRoute(
-                    path: 'join',
-                    name: RouteNames.joinTeam,
-                    builder: (context, state) => const JoinTeamPage(),
-                  ),
-                  GoRoute(
-                    path: ':teamId',
-                    name: RouteNames.teamEvents,
-                    builder: (context, state) => TeamEventsPage(
-                      teamId: state.pathParameters['teamId']!,
-                      teamName:
-                          state.uri.queryParameters['name'] ?? 'Team',
-                    ),
-                    routes: [
-                      GoRoute(
-                        path: 'detail',
-                        name: RouteNames.teamDetail,
-                        builder: (context, state) => TeamDetailPage(
-                          teamId: state.pathParameters['teamId']!,
-                        ),
-                      ),
-                      GoRoute(
-                        path: 'event/:eventId',
-                        name: RouteNames.eventDetail,
-                        builder: (context, state) => EventDetailPage(
-                          eventId: state.pathParameters['eventId']!,
-                          event: state.extra as TeamEvent?,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          // Tab 3: Profiel
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/profile',
-                name: RouteNames.profile,
-                builder: (context, state) => const ProfilePage(),
-              ),
-            ],
-          ),
+          StatefulShellBranch(routes: [
+            GoRoute(path: '/', name: RouteNames.home, builder: (context, state) => const HomePage()),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: '/teams', name: RouteNames.teams, builder: (context, state) => const TeamListPage(), routes: [
+              GoRoute(path: 'join', name: RouteNames.teamJoin, builder: (context, state) => const TeamJoinPage()),
+              GoRoute(path: ':teamId', name: RouteNames.teamDetail, builder: (context, state) => TeamDetailPage(teamId: state.pathParameters['teamId']!), routes: [
+                GoRoute(path: 'invite', name: RouteNames.teamInvite, builder: (context, state) => TeamInvitePage(teamId: state.pathParameters['teamId']!)),
+                GoRoute(path: 'event/create', name: RouteNames.eventCreate, builder: (context, state) => EventCreatePage(teamId: state.pathParameters['teamId']!)),
+                GoRoute(path: 'event/:eventId', name: RouteNames.eventDetail, builder: (context, state) => EventDetailPage(eventId: state.pathParameters['eventId']!, event: state.extra as TeamEvent?)),
+              ]),
+            ]),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(path: '/profile', name: RouteNames.profile, builder: (context, state) => const ProfilePage(), routes: [
+              GoRoute(path: 'password', name: RouteNames.profilePassword, builder: (context, state) => const PasswordPage()),
+              GoRoute(path: 'notifications', name: RouteNames.profileNotifications, builder: (context, state) => const NotificationsPage()),
+            ]),
+          ]),
         ],
       ),
-
-      // Checklists (accessible from anywhere)
-      GoRoute(
-        path: '/checklists',
-        name: RouteNames.checklists,
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const ChecklistsPage(),
-        routes: [
-          GoRoute(
-            path: 'create',
-            name: RouteNames.checklistCreate,
-            builder: (context, state) => ChecklistCreatePage(
-              teamId: state.uri.queryParameters['teamId'],
-            ),
-          ),
-          GoRoute(
-            path: 'edit/:id',
-            name: RouteNames.checklistEdit,
-            builder: (context, state) => ChecklistCreatePage(
-              checklistId: state.pathParameters['id'],
-            ),
-          ),
-          GoRoute(
-            path: ':id',
-            name: RouteNames.checklistDetail,
-            builder: (context, state) => ChecklistDetailPage(
-              checklistId: state.pathParameters['id']!,
-            ),
-            routes: [
-              GoRoute(
-                path: 'wizard',
-                name: RouteNames.checklistWizard,
-                builder: (context, state) => ChecklistWizardPage(
-                  checklistId: state.pathParameters['id']!,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-
-      // Clubs
-      GoRoute(
-        path: '/clubs',
-        name: RouteNames.clubs,
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const ClubListPage(),
-        routes: [
-          GoRoute(
-            path: ':clubId',
-            name: RouteNames.clubDetail,
-            builder: (context, state) => ClubDetailPage(
-              clubId: state.pathParameters['clubId']!,
-            ),
-          ),
-        ],
-      ),
-
-      // News
-      GoRoute(
-        path: '/news',
-        name: RouteNames.news,
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
-          final clubId = state.uri.queryParameters['clubId'] ?? '';
-          final teamIds =
-              state.uri.queryParameters['teamIds']?.split(',') ?? [];
-          final canPost =
-              state.uri.queryParameters['canPost'] == 'true';
-          return NewsPage(
-            clubId: clubId,
-            teamIds: teamIds,
-            canPost: canPost,
-          );
-        },
-        routes: [
-          GoRoute(
-            path: 'create',
-            name: RouteNames.newsCreate,
-            builder: (context, state) => NewsCreatePage(
-              clubId: state.uri.queryParameters['clubId'] ?? '',
-              teamId: state.uri.queryParameters['teamId'],
-            ),
-          ),
-        ],
-      ),
-
-      // Finance
-      GoRoute(
-        path: '/finance',
-        name: RouteNames.finance,
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => FinancePage(
-          teamId: state.uri.queryParameters['teamId'] ?? '',
-        ),
-        routes: [
-          GoRoute(
-            path: 'create',
-            name: RouteNames.contributionCreate,
-            builder: (context, state) => ContributionCreatePage(
-              teamId: state.uri.queryParameters['teamId'] ?? '',
-            ),
-          ),
-        ],
-      ),
-
-      // Standings
-      GoRoute(
-        path: '/standings',
-        name: RouteNames.standings,
-        parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => StandingsPage(
-          teamId: state.uri.queryParameters['teamId'] ?? '',
-        ),
-      ),
+      GoRoute(path: '/team/create', name: RouteNames.teamCreate, parentNavigatorKey: _rootNavigatorKey, builder: (context, state) => const TeamCreatePage()),
     ],
   );
 }
